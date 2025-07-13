@@ -2,7 +2,7 @@ import axios from 'axios';
 import { EXPO_PUBLIC_API_LOCAL } from '@env';
 
 const axiosInstance = axios.create({
-  baseURL: EXPO_PUBLIC_API_LOCAL,
+  baseURL: "http://localhost:8080/api/v1",
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { AppProvider } from "./src/context/AppContext";
+import { AppContext, AppProvider } from "./src/context/AppContext";
 import { Provider as PaperProvider } from 'react-native-paper';
 
 import LoginScreen from './src/screens/LoginScreen';
