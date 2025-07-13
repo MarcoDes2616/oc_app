@@ -1,92 +1,109 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { TextInput, Button, Text, IconButton } from 'react-native-paper';
-import * as LocalAuthentication from 'expo-local-authentication';
+import React, { useState, useContext } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { TextInput, Button, Text } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
+import axiosInstance from '../utils/axiosInstance';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login, loginWithBiometrics, isBiometricAvailable } = useContext(AppContext);
+  const [loginToken, setLoginToken] = useState('');
+  const [tokenRequested, setTokenRequested] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { login } = useContext(AppContext);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor, completa todos los campos.');
+  const requestLoginToken = async () => {
+    if (!email) {
+      Alert.alert('Error', 'Por favor ingresa un correo válido.');
       return;
     }
-    await login({ email, password });
-  };
 
-  const handleBiometricAuth = async () => {
     try {
-      const result = await loginWithBiometrics();
-      if (!result.success) {
-        Alert.alert('Error', result.error || 'Autenticación fallida.');
+      setLoading(true);
+      const response = await axiosInstance.post('/auth/request-token', { email });
+      if (response.data.success) {
+        setTokenRequested(true);
+        Alert.alert('Éxito', 'Se ha enviado un token a tu correo.');
+      } else {
+        Alert.alert('Error', response.data.message || 'No se pudo solicitar el token.');
       }
     } catch (err) {
-      Alert.alert('Error', 'Ocurrió un error con la autenticación biométrica.');
+      console.error(err);
+      Alert.alert('Error', 'Ocurrió un error al solicitar el token.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleLogin = async () => {
+    if (!email || !loginToken) {
+      Alert.alert('Error', 'Debes completar ambos campos.');
+      return;
+    }
+
+    await login({ email, login_token: loginToken });
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <Text style={styles.title}>Iniciar sesión</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Autenticación por Token</Text>
+
       <TextInput
         label="Correo electrónico"
         value={email}
         onChangeText={setEmail}
         style={styles.input}
-        keyboardType="email-address"
         autoCapitalize="none"
+        keyboardType="email-address"
       />
-      <TextInput
-        label="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-      />
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
-        Iniciar sesión
-      </Button>
 
-      {isBiometricAvailable && (
-        <View style={styles.biometricContainer}>
-          <Text style={{ marginBottom: 10 }}>O usa tu biometría</Text>
-          <IconButton
-            icon="fingerprint"
-            size={36}
-            onPress={handleBiometricAuth}
+      {!tokenRequested ? (
+        <Button
+          mode="contained"
+          onPress={requestLoginToken}
+          loading={loading}
+          style={styles.button}
+        >
+          Solicitar token
+        </Button>
+      ) : (
+        <>
+          <TextInput
+            label="Token recibido por email"
+            value={loginToken}
+            onChangeText={setLoginToken}
+            style={styles.input}
+            keyboardType="default"
           />
-        </View>
+          <Button
+            mode="contained"
+            onPress={handleLogin}
+            loading={loading}
+            style={styles.button}
+          >
+            Iniciar sesión
+          </Button>
+        </>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 30,
+    textAlign: 'center',
   },
   input: {
     marginBottom: 15,
   },
   button: {
-    marginVertical: 10,
-  },
-  biometricContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 25,
-    textAlign: 'center',
+    marginTop: 10,
   },
 });
 
