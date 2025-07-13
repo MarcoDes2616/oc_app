@@ -1,18 +1,17 @@
 import React, { useContext } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
+import { Button } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
 
 const PerfilScreen = () => {
-  const { setUser } = useContext(AppContext);
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  const { logout } = useContext(AppContext);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>⚙️ Perfil y configuración</Text>
-      <Button title="Cerrar sesión" onPress={handleLogout} />
+      <Text style={{ marginBottom: 20 }}>⚙️ Perfil y configuración</Text>
+      <Button mode="outlined" onPress={logout}>
+        Cerrar sesión
+      </Button>
     </View>
   );
 };

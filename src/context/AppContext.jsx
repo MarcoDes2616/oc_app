@@ -67,6 +67,16 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+  try {
+    await SecureStore.deleteItemAsync('user_token');
+    await SecureStore.deleteItemAsync('biometric_credentials');
+    setUser(null);
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+  }
+};
+
   return (
     <AppContext.Provider
       value={{
@@ -74,6 +84,7 @@ export const AppProvider = ({ children }) => {
         login,
         loginWithBiometrics,
         isBiometricAvailable,
+        logout
       }}
     >
       {children}
