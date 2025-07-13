@@ -1,7 +1,8 @@
-import * as SecureStore from 'expo-secure-store';
-import * as LocalAuthentication from 'expo-local-authentication';
-import axiosInstance from '../../api/axios.js';
-import { createContext, useEffect, useState } from 'react';
+import * as SecureStore from "expo-secure-store";
+import * as LocalAuthentication from "expo-local-authentication";
+import axiosInstance from "../../api/axios.js";
+import { createContext, useEffect, useState } from "react";
+import { Alert, Platform } from "react-native"; // ✅ IMPORTADO
 
 const AppContext = createContext();
 
@@ -11,7 +12,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     checkBiometricSupport();
-    checkStoredCredentials();
+    // checkStoredCredentials();
   }, []);
 
   const checkBiometricSupport = async () => {
@@ -20,75 +21,92 @@ export const AppProvider = ({ children }) => {
     setIsBiometricAvailable(compatible && enrolled);
   };
 
-  const login = async ({ email, password }) => {
+  const login = async ({ email, login_token }) => {
     try {
-      const response = await axiosInstance.post('/login', { email, password });
-      const { token, userData } = response.data;
-      setUser(userData);
-      await SecureStore.setItemAsync('user_token', token);
-      await SecureStore.setItemAsync('biometric_credentials', JSON.stringify({ email, password }));
+      const response = await axiosInstance.post("/system/login", {
+        email,
+        login_token,
+      });
+
+      const { token, user } = response.data;
+      setUser(user);
+
+      // ✅ Validación para evitar crash en web
+      if (Platform.OS !== "web") {
+        await SecureStore.setItemAsync("user_token", token);
+        await SecureStore.setItemAsync(
+          "biometric_credentials",
+          JSON.stringify({ email, login_token })
+        );
+      }
     } catch (error) {
-      console.log('Login error:', error);
-      Alert.alert('Error de autenticación', 'Credenciales incorrectas');
+      console.error("Login error:", error);
+      Alert.alert("Error de autenticación", "Token inválido o expirado.");
     }
   };
 
   const loginWithBiometrics = async () => {
     const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Autenticación biométrica',
-      fallbackLabel: 'Usar contraseña',
+      promptMessage: "Autenticación biométrica",
+      fallbackLabel: "Usar contraseña",
     });
 
     if (result.success) {
-      const stored = await SecureStore.getItemAsync('biometric_credentials');
-      if (stored) {
-        const creds = JSON.parse(stored);
-        await login(creds);
-        return { success: true };
+      if (Platform.OS !== "web") {
+        const stored = await SecureStore.getItemAsync("biometric_credentials");
+        if (stored) {
+          const creds = JSON.parse(stored);
+          await login(creds);
+          return { success: true };
+        } else {
+          return { success: false, error: "No hay credenciales almacenadas" };
+        }
       } else {
-        return { success: false, error: 'No hay credenciales almacenadas' };
+        return { success: false, error: "Biometría no disponible en web" };
       }
     } else {
-      return { success: false, error: 'Falló la autenticación biométrica' };
+      return { success: false, error: "Falló la autenticación biométrica" };
     }
   };
 
   const checkStoredCredentials = async () => {
-    const token = await SecureStore.getItemAsync('user_token');
-    if (token) {
-      try {
-        const response = await axiosInstance.get('/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.log('Token inválido o expirado');
+    if (Platform.OS !== "web") {
+      const token = await SecureStore.getItemAsync("user_token");
+      if (token) {
+        try {
+          const response = await axiosInstance.get("/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.log("Token inválido o expirado");
+        }
       }
     }
   };
 
   const logout = async () => {
-  try {
-    await SecureStore.deleteItemAsync('user_token');
-    await SecureStore.deleteItemAsync('biometric_credentials');
-    setUser(null);
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error);
-  }
-};
+    try {
+      if (Platform.OS !== "web") {
+        await SecureStore.deleteItemAsync("user_token");
+        await SecureStore.deleteItemAsync("biometric_credentials");
+      }
+      setUser(null);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
+  const functions = {
+    user,
+    login,
+    loginWithBiometrics,
+    isBiometricAvailable,
+    logout,
+  };
 
   return (
-    <AppContext.Provider
-      value={{
-        user,
-        login,
-        loginWithBiometrics,
-        isBiometricAvailable,
-        logout
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={functions}>{children}</AppContext.Provider>
   );
 };
 

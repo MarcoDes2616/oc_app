@@ -1,8 +1,8 @@
-import React, { useState, useContext } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { useState, useContext } from 'react';
+import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../api/axios.js';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -12,14 +12,15 @@ const LoginScreen = () => {
   const { login } = useContext(AppContext);
 
   const requestLoginToken = async () => {
-    if (!email) {
+    if (!email.trim()) {
       Alert.alert('Error', 'Por favor ingresa un correo válido.');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await axiosInstance.post('/auth/request-token', { email });
+      const response = await axiosInstance.post('/system/request_auth_token', { email: email.trim() });
+      
       if (response.data.success) {
         setTokenRequested(true);
         Alert.alert('Éxito', 'Se ha enviado un token a tu correo.');
@@ -27,7 +28,7 @@ const LoginScreen = () => {
         Alert.alert('Error', response.data.message || 'No se pudo solicitar el token.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error solicitando token:', err);
       Alert.alert('Error', 'Ocurrió un error al solicitar el token.');
     } finally {
       setLoading(false);
@@ -35,16 +36,26 @@ const LoginScreen = () => {
   };
 
   const handleLogin = async () => {
-    if (!email || !loginToken) {
+    if (!email.trim() || !loginToken.trim()) {
       Alert.alert('Error', 'Debes completar ambos campos.');
       return;
     }
 
-    await login({ email, login_token: loginToken });
+    try {
+      setLoading(true);
+      await login({ email: email.trim(), login_token: loginToken.trim() });
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo iniciar sesión.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.container}
+    >
       <Text style={styles.title}>Autenticación por Token</Text>
 
       <TextInput
@@ -54,6 +65,7 @@ const LoginScreen = () => {
         style={styles.input}
         autoCapitalize="none"
         keyboardType="email-address"
+        disabled={tokenRequested}
       />
 
       {!tokenRequested ? (
@@ -61,6 +73,7 @@ const LoginScreen = () => {
           mode="contained"
           onPress={requestLoginToken}
           loading={loading}
+          disabled={loading}
           style={styles.button}
         >
           Solicitar token
@@ -73,18 +86,20 @@ const LoginScreen = () => {
             onChangeText={setLoginToken}
             style={styles.input}
             keyboardType="default"
+            autoCapitalize="none"
           />
           <Button
             mode="contained"
             onPress={handleLogin}
             loading={loading}
+            disabled={loading}
             style={styles.button}
           >
             Iniciar sesión
           </Button>
         </>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -98,6 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 30,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   input: {
     marginBottom: 15,
