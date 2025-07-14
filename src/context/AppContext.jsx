@@ -1,8 +1,8 @@
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
-import axiosInstance from "../../api/axios.js";
+import axiosInstance from "../services/axios.js";
 import { createContext, useEffect, useState } from "react";
-import { Alert, Platform } from "react-native"; // ✅ IMPORTADO
+import { Alert, Platform } from "react-native";
 
 const AppContext = createContext();
 

@@ -1,17 +1,20 @@
-import axios from "axios";
-import authService from "./authServices";
-
-const BASE_URL = import.meta.env.VITE_APP_API_PROD
+import axios from 'axios';
+import { EXPO_PUBLIC_API_LOCAL, EXPO_PUBLIC_API_PROD } from '@env';
 
 const axiosInstance = axios.create({
-    baseURL: BASE_URL,
-})
-axiosInstance.interceptors.request.use((config) => {
-    config.headers = {Authorization : "Bearer " + authService.getCurrentUser()}
-    return config;
+  baseURL: EXPO_PUBLIC_API_LOCAL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-axiosInstance.interceptors.response.use((response) => {
-    return response;
-})
+// Puedes añadir interceptores aquí si necesitas manejar errores o respuestas globalmente
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('Error en la solicitud:', error);
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;

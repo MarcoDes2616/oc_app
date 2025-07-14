@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
-import axiosInstance from '../../api/axios.js';
+import axiosInstance from '../services/axios.js';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
