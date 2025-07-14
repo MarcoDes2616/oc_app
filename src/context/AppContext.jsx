@@ -12,7 +12,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     checkBiometricSupport();
-    // checkStoredCredentials();
+    checkStoredCredentials();
   }, []);
 
   const checkBiometricSupport = async () => {
@@ -74,7 +74,7 @@ export const AppProvider = ({ children }) => {
       const token = await SecureStore.getItemAsync("user_token");
       if (token) {
         try {
-          const response = await axiosInstance.get("/me", {
+          const response = await axiosInstance.get("system/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
