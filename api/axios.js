@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { EXPO_PUBLIC_API_LOCAL } from '@env';
+import { EXPO_PUBLIC_API_LOCAL, EXPO_PUBLIC_API_PROD } from '@env';
 
 const axiosInstance = axios.create({
-  baseURL: EXPO_PUBLIC_API_LOCAL,
+  baseURL: EXPO_PUBLIC_API_PROD,
   headers: {
     'Content-Type': 'application/json',
   },
