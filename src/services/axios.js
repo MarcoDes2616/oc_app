@@ -8,7 +8,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Puedes añadir interceptores aquí si necesitas manejar errores o respuestas globalmente
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
