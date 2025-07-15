@@ -1,5 +1,7 @@
-const getCurrentUser = () => {
-  let token = localStorage.getItem("token");
+import * as SecureStore from "expo-secure-store";
+
+const getCurrentUser = async() => {
+  const token = await SecureStore.getItemAsync("user_token");
   return token
 };
 

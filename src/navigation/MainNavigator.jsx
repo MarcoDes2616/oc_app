@@ -2,8 +2,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import SenalesScreen from '../screens/SenalesScreen';
-import CuentaScreen from '../screens/CuentaScreen';
 import PerfilScreen from '../screens/PerfilScreen';
+import DashboardScreen from '../screens/DashboardScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,10 +27,10 @@ const MainNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Cuenta"
-        component={CuentaScreen}
+        name="Dashboard"
+        component={DashboardScreen}
         options={{
-          tabBarLabel: 'Cuenta',
+          tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="wallet" color={color} size={size} />
           ),
