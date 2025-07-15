@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, IconButton } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
 import axiosInstance from '../services/axios.js';
 
@@ -10,9 +10,8 @@ const LoginScreen = () => {
   const [tokenRequested, setTokenRequested] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { login, loginWithBiometrics, user } = useContext(AppContext);
+  const { login, loginWithBiometrics } = useContext(AppContext);
 
-  // 🔐 Intentar autenticación biométrica automática al cargar
   useEffect(() => {
     const attemptBiometricLogin = async () => {
       const result = await loginWithBiometrics();
@@ -22,7 +21,6 @@ const LoginScreen = () => {
       } else if (result.error && result.error !== 'Falló la autenticación biométrica') {
         console.warn('Biometric login skipped:', result.error);
       }
-      // Si falla o el usuario cancela, simplemente dejamos que continúe con login manual
     };
 
     attemptBiometricLogin();
@@ -68,11 +66,30 @@ const LoginScreen = () => {
     }
   };
 
+  // 🔄 Reiniciar proceso de login manual
+  const resetLogin = () => {
+    setEmail('');
+    setLoginToken('');
+    setTokenRequested(false);
+    setLoading(false);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
+      {/* Botón de reinicio en la esquina */}
+      {tokenRequested && (
+        <IconButton
+          icon="refresh"
+          size={24}
+          style={styles.resetIcon}
+          onPress={resetLogin}
+          accessibilityLabel="Reiniciar proceso de login"
+        />
+      )}
+
       <Text style={styles.title}>Autenticación por Token</Text>
 
       <TextInput
@@ -137,6 +154,12 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
+  },
+  resetIcon: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
   },
 });
 
