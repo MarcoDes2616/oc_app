@@ -9,11 +9,8 @@ const BiometricToggle = () => {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    // Verifica si ya hay credenciales guardadas
     const checkBiometricState = async () => {
       const stored = await SecureStore.getItemAsync('biometric_credentials');
-      console.log('Stored biometric credentials:', stored);
-      
       setEnabled(!!stored);
     };
     checkBiometricState();

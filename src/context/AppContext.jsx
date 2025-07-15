@@ -17,7 +17,6 @@ export const AppProvider = ({ children }) => {
       await checkBiometricSupport();
       await checkStoredCredentials();
 
-      // Segundo: intentar login biométrico (si hay credenciales)
       if (Platform.OS !== "web") {
         const stored = await SecureStore.getItemAsync("biometric_credentials");
         if (stored) {
@@ -46,7 +45,6 @@ export const AppProvider = ({ children }) => {
       const { token, user } = response.data;
       setUser(user);
 
-      // ✅ Validación para evitar crash en web
       if (Platform.OS !== "web") {
         await SecureStore.setItemAsync("user_token", token);
         setCredentials({ email, login_token });
