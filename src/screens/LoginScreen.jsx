@@ -66,7 +66,6 @@ const LoginScreen = () => {
     }
   };
 
-  // 🔄 Reiniciar proceso de login manual
   const resetLogin = () => {
     setEmail('');
     setLoginToken('');
@@ -79,7 +78,6 @@ const LoginScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      {/* Botón de reinicio en la esquina */}
       {tokenRequested && (
         <IconButton
           icon="refresh"
@@ -103,15 +101,26 @@ const LoginScreen = () => {
       />
 
       {!tokenRequested ? (
-        <Button
-          mode="contained"
-          onPress={requestLoginToken}
-          loading={loading}
-          disabled={loading}
-          style={styles.button}
-        >
-          Solicitar token
-        </Button>
+        <>
+          <Button
+            mode="contained"
+            onPress={requestLoginToken}
+            loading={loading}
+            disabled={loading}
+            style={styles.button}
+          >
+            Solicitar token
+          </Button>
+
+          <Button
+            mode="outlined"
+            onPress={() => setTokenRequested(true)}
+            disabled={loading || !email.trim()}
+            style={styles.secondaryButton}
+          >
+            Ya tengo un token
+          </Button>
+        </>
       ) : (
         <>
           <TextInput
@@ -153,6 +162,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   button: {
+    marginTop: 10,
+  },
+  secondaryButton: {
     marginTop: 10,
   },
   resetIcon: {
