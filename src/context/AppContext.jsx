@@ -91,7 +91,8 @@ export const AppProvider = ({ children }) => {
           });
           setUser(response.data);
         } catch (error) {
-          console.log("Token inválido o expirado");
+          logout();
+          await SecureStore.deleteItemAsync('biometric_credentials');
         }
       }
     }
