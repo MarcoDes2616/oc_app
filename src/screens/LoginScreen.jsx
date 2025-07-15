@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
@@ -9,7 +9,24 @@ const LoginScreen = () => {
   const [loginToken, setLoginToken] = useState('');
   const [tokenRequested, setTokenRequested] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useContext(AppContext);
+
+  const { login, loginWithBiometrics, user } = useContext(AppContext);
+
+  // 🔐 Intentar autenticación biométrica automática al cargar
+  useEffect(() => {
+    const attemptBiometricLogin = async () => {
+      const result = await loginWithBiometrics();
+
+      if (result.success) {
+        Alert.alert('Bienvenido', 'Autenticación biométrica exitosa.');
+      } else if (result.error && result.error !== 'Falló la autenticación biométrica') {
+        console.warn('Biometric login skipped:', result.error);
+      }
+      // Si falla o el usuario cancela, simplemente dejamos que continúe con login manual
+    };
+
+    attemptBiometricLogin();
+  }, []);
 
   const requestLoginToken = async () => {
     if (!email.trim()) {
@@ -20,7 +37,7 @@ const LoginScreen = () => {
     try {
       setLoading(true);
       const response = await axiosInstance.post('/system/request_auth_token', { email: email.trim() });
-      
+
       if (response.data.success) {
         setTokenRequested(true);
         Alert.alert('Éxito', 'Se ha enviado un token a tu correo.');
