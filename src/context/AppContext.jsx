@@ -9,31 +9,26 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
-  // en AppContext
-const [isAppLoading, setIsAppLoading] = useState(true);
+  const [isAppLoading, setIsAppLoading] = useState(true);
+  const [credentials, setCredentials] = useState(null);
 
-useEffect(() => {
-  checkBiometricSupport();
-  checkStoredCredentials();
-  const initializeApp = async () => {
-    await checkBiometricSupport();
+  useEffect(() => {
+    const initializeApp = async () => {
+      await checkBiometricSupport();
+      await checkStoredCredentials();
 
-    // Primero: revisar token existente
-    await checkStoredCredentials();
-
-    // Segundo: intentar login biométrico (si hay credenciales)
-    if (Platform.OS !== "web") {
-      const stored = await SecureStore.getItemAsync("biometric_credentials");
-      if (stored) {
-        await loginWithBiometrics(); // internamente hace login()
+      // Segundo: intentar login biométrico (si hay credenciales)
+      if (Platform.OS !== "web") {
+        const stored = await SecureStore.getItemAsync("biometric_credentials");
+        if (stored) {
+          await loginWithBiometrics();
+        }
       }
-    }
+      setIsAppLoading(false);
+    };
 
-    setIsAppLoading(false); // 💥 Ya estamos listos para renderizar la app
-  };
-
-  initializeApp();
-}, []);
+    initializeApp();
+  }, []);
 
   const checkBiometricSupport = async () => {
     const compatible = await LocalAuthentication.hasHardwareAsync();
@@ -54,10 +49,7 @@ useEffect(() => {
       // ✅ Validación para evitar crash en web
       if (Platform.OS !== "web") {
         await SecureStore.setItemAsync("user_token", token);
-        await SecureStore.setItemAsync(
-          "biometric_credentials",
-          JSON.stringify({ email, login_token })
-        );
+        setCredentials({ email, login_token });
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -109,7 +101,6 @@ useEffect(() => {
     try {
       if (Platform.OS !== "web") {
         await SecureStore.deleteItemAsync("user_token");
-        await SecureStore.deleteItemAsync("biometric_credentials");
       }
       setUser(null);
     } catch (error) {
@@ -124,6 +115,7 @@ useEffect(() => {
     isBiometricAvailable,
     logout,
     isAppLoading,
+    credentials
   };
 
   return (

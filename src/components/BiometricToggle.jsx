@@ -5,13 +5,15 @@ import * as SecureStore from 'expo-secure-store';
 import { AppContext } from '../context/AppContext';
 
 const BiometricToggle = () => {
-  const { isBiometricAvailable, user } = useContext(AppContext);
+  const { isBiometricAvailable, user, credentials } = useContext(AppContext);
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     // Verifica si ya hay credenciales guardadas
     const checkBiometricState = async () => {
       const stored = await SecureStore.getItemAsync('biometric_credentials');
+      console.log('Stored biometric credentials:', stored);
+      
       setEnabled(!!stored);
     };
     checkBiometricState();
@@ -27,7 +29,7 @@ const BiometricToggle = () => {
         if (login_token) {
           await SecureStore.setItemAsync(
             'biometric_credentials',
-            JSON.stringify({ email: user.email, login_token })
+            JSON.stringify(credentials)
           );
           setEnabled(true);
         }
