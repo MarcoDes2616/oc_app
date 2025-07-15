@@ -1,8 +1,11 @@
 import { useState, useContext, useEffect } from 'react';
 import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, IconButton } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../context/AppContext';
 import axiosInstance from '../services/axios.js';
+
+const STORAGE_KEY = 'user_email';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -13,9 +16,17 @@ const LoginScreen = () => {
   const { login, loginWithBiometrics } = useContext(AppContext);
 
   useEffect(() => {
-    const attemptBiometricLogin = async () => {
-      const result = await loginWithBiometrics();
+    const init = async () => {
+      try {
+        const storedEmail = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedEmail) {
+          setEmail(storedEmail);
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar el correo almacenado:', err);
+      }
 
+      const result = await loginWithBiometrics();
       if (result.success) {
         Alert.alert('Bienvenido', 'Autenticación biométrica exitosa.');
       } else if (result.error && result.error !== 'Falló la autenticación biométrica') {
@@ -23,7 +34,7 @@ const LoginScreen = () => {
       }
     };
 
-    attemptBiometricLogin();
+    init();
   }, []);
 
   const requestLoginToken = async () => {
@@ -37,6 +48,7 @@ const LoginScreen = () => {
       const response = await axiosInstance.post('/system/request_auth_token', { email: email.trim() });
 
       if (response.data.success) {
+        await AsyncStorage.setItem(STORAGE_KEY, email.trim());
         setTokenRequested(true);
         Alert.alert('Éxito', 'Se ha enviado un token a tu correo.');
       } else {
@@ -58,6 +70,7 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
+      await AsyncStorage.setItem(STORAGE_KEY, email.trim());
       await login({ email: email.trim(), login_token: loginToken.trim() });
     } catch (err) {
       Alert.alert('Error', 'No se pudo iniciar sesión.');
@@ -66,11 +79,12 @@ const LoginScreen = () => {
     }
   };
 
-  const resetLogin = () => {
+  const resetLogin = async () => {
     setEmail('');
     setLoginToken('');
     setTokenRequested(false);
     setLoading(false);
+    await AsyncStorage.removeItem(STORAGE_KEY);
   };
 
   return (
