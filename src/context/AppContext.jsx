@@ -9,11 +9,31 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+  // en AppContext
+const [isAppLoading, setIsAppLoading] = useState(true);
 
-  useEffect(() => {
-    checkBiometricSupport();
-    checkStoredCredentials();
-  }, []);
+useEffect(() => {
+  checkBiometricSupport();
+  checkStoredCredentials();
+  const initializeApp = async () => {
+    await checkBiometricSupport();
+
+    // Primero: revisar token existente
+    await checkStoredCredentials();
+
+    // Segundo: intentar login biométrico (si hay credenciales)
+    if (Platform.OS !== "web") {
+      const stored = await SecureStore.getItemAsync("biometric_credentials");
+      if (stored) {
+        await loginWithBiometrics(); // internamente hace login()
+      }
+    }
+
+    setIsAppLoading(false); // 💥 Ya estamos listos para renderizar la app
+  };
+
+  initializeApp();
+}, []);
 
   const checkBiometricSupport = async () => {
     const compatible = await LocalAuthentication.hasHardwareAsync();
@@ -103,6 +123,7 @@ export const AppProvider = ({ children }) => {
     loginWithBiometrics,
     isBiometricAvailable,
     logout,
+    isAppLoading,
   };
 
   return (

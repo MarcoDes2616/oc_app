@@ -1,13 +1,15 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { AppContext, AppProvider } from "./src/context/AppContext";
-import { Provider as PaperProvider } from 'react-native-paper';
+import { AppContext } from "./src/context/AppContext";
 
 import LoginScreen from './src/screens/LoginScreen';
-import MainNavigator from './src/navigation/MainNavigator'; // ← Crea este con tus pantallas internas
+import MainNavigator from './src/navigation/MainNavigator';
+import SplashScreen from './src/screens/SplashScreen';
 
 const AppContent = () => {
-  const { user } = useContext(AppContext);
+  const { user, isAppLoading } = useContext(AppContext);
+
+  if (isAppLoading) return <SplashScreen />;
 
   return (
     <NavigationContainer>
@@ -16,12 +18,4 @@ const AppContent = () => {
   );
 };
 
-export default function App() {
-  return (
-    <AppProvider>
-      <PaperProvider>
-        <AppContent />
-      </PaperProvider>
-    </AppProvider>
-  );
-}
+export default AppContent;
