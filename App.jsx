@@ -4,19 +4,17 @@ import AppContent from './src/AppContent';
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 
-
 export default function App() {
   useEffect(() => {
-    // Escuchar notificaciones recibidas
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notificación recibida:", notification);
-        // Aquí puedes navegar a una pantalla específica
-        // Ejemplo: navigation.navigate("Post", { id: notification.data.postId });
-      }
-    );
+    const subscription = Notifications.addNotificationReceivedListener(notification => {
+      const data = notification.request.content;
 
-    return () => subscription.remove(); // Limpiar listener al desmontar
+      // if (data.screen === 'profile') {
+      //   navigation.navigate('Profile', { userId: data.userId });
+      // }
+    });
+
+    return () => subscription.remove();
   }, []);
 
   return (
