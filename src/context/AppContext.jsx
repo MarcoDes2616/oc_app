@@ -3,6 +3,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import axiosInstance from "../services/axios.js";
 import { createContext, useEffect, useState } from "react";
 import { Alert, Platform } from "react-native";
+import { registerForPushNotifications } from "../utils/notifications.js";
 
 const AppContext = createContext();
 
@@ -49,6 +50,13 @@ export const AppProvider = ({ children }) => {
         await SecureStore.setItemAsync("user_token", token);
         setCredentials({ email, login_token });
       }
+      const pushToken = await registerForPushNotifications();
+      if (pushToken) {
+        await axiosInstance.post("/system/save-push-token", {
+          userId: user.id,
+          pushToken,
+        });
+      }
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error de autenticación", "Token inválido o expirado.");
@@ -90,7 +98,7 @@ export const AppProvider = ({ children }) => {
           setUser(response.data);
         } catch (error) {
           logout();
-          await SecureStore.deleteItemAsync('biometric_credentials');
+          await SecureStore.deleteItemAsync("biometric_credentials");
         }
       }
     }
@@ -114,7 +122,7 @@ export const AppProvider = ({ children }) => {
     isBiometricAvailable,
     logout,
     isAppLoading,
-    credentials
+    credentials,
   };
 
   return (
