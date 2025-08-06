@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "oc_app",
-    "slug": "oc_app",
+    "slug": "operationa-club",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +27,12 @@
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cf500426-7b25-4dcd-aed6-f8bbf5736a69"
+      }
+    },
+    "owner": "cmarko"
   }
 }

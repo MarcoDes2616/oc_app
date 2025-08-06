@@ -1,4 +1,3 @@
-// utils/notifications.js
 import * as Notifications from "expo-notifications";
 
 Notifications.setNotificationHandler({
@@ -23,8 +22,8 @@ export async function registerForPushNotifications() {
     alert("No se otorgaron permisos para notificaciones push");
     return null;
   }
-
   // Obtener el token push
   const token = (await Notifications.getExpoPushTokenAsync()).data;
+  console.log("Token de notificación push:", token);
   return token;
 }

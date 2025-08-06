@@ -51,6 +51,8 @@ export const AppProvider = ({ children }) => {
         setCredentials({ email, login_token });
       }
       const pushToken = await registerForPushNotifications();
+      console.log("Push Token:", pushToken);
+      
       if (pushToken) {
         await axiosInstance.post("/system/save-push-token", {
           userId: user.id,
