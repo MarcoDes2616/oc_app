@@ -6,16 +6,16 @@ import { useNavigation } from '@react-navigation/native';
 
 const menuItems = [
   { 
-    screen: 'Settings', 
-    icon: 'cog',
-    roles: [1, 2],
-    color: '#6366f1'
-  },
-  { 
     screen: 'ProfileMain', 
     icon: 'account',
     roles: [1, 2],
     color: '#10b981'
+  },
+  { 
+    screen: 'Settings', 
+    icon: 'cog',
+    roles: [1, 2],
+    color: '#6366f1'
   },
   { 
     screen: 'Admin', 
