@@ -32,7 +32,7 @@ const MainNavigator = () => {
       screenOptions={{
         headerShown: true,
         tabBarActiveTintColor: "#6200ee",
-        tabBarStyle: { paddingBottom: 5, height: 60 },
+        tabBarStyle: { paddingBottom: 5, height: 95 },
       }}
     >
       <Tab.Screen
