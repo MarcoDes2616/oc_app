@@ -1,5 +1,6 @@
 import { FlatList, View, Text, StyleSheet } from 'react-native';
 import useNotifications from '../hooks/useNotifications';
+import { Button } from 'react-native-paper';
 
 export default function NotificationsScreen() {
   const { notifications, clearNotifications } = useNotifications();

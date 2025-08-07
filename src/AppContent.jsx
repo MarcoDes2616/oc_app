@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-
 import { AppContext } from './context/AppContext';
 import LoginScreen from './screens/LoginScreen';
 import MainNavigator from './navigation/MainNavigator';
@@ -13,7 +12,7 @@ const AppContent = () => {
 
   return (
     <NavigationContainer>
-      {user ? <MainNavigator /> : <LoginScreen />}
+      {!user ? <MainNavigator /> : <LoginScreen />}
     </NavigationContainer>
   );
 };

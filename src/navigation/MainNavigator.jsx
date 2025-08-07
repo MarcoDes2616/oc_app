@@ -1,66 +1,95 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { View, StyleSheet } from "react-native";
+import { Badge } from "react-native-paper";
+import useNotifications from "../hooks/useNotifications";
 import SenalesScreen from "../screens/SenalesScreen";
-import PerfilScreen from "../screens/PerfilScreen";
 import DashboardScreen from "../screens/DashboardScreen";
-import NotificationFabButton from "../components/NotificationFabButton";
+import NotificationsScreen from "../screens/NotificationsScreen";
 
 const Tab = createBottomTabNavigator();
 
 const MainNavigator = () => {
-  return (
-    <>
-      {/* <NotificationFabButton /> */}
+  const { notifications } = useNotifications();
 
-      <Tab.Navigator
-        initialRouteName="Senales"
-        screenOptions={{
-          headerShown: true,
-          tabBarActiveTintColor: "#6200ee",
+  return (
+    <Tab.Navigator
+      initialRouteName="Señales"
+      screenOptions={{
+        headerShown: true,
+        tabBarActiveTintColor: "#6200ee",
+        tabBarStyle: { paddingBottom: 5, height: 60 },
+      }}
+    >
+      <Tab.Screen
+        name="Señales"
+        component={SenalesScreen}
+        options={{
+          tabBarLabel: "Señales",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="chart-line"
+              color={color}
+              size={size}
+            />
+          ),
         }}
-      >
-        <Tab.Screen
-          name="Senales"
-          component={SenalesScreen}
-          options={{
-            tabBarLabel: "Señales",
-            tabBarIcon: ({ color, size }) => (
+      />
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarLabel: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="wallet" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Notificaciones"
+        component={NotificationsScreen}
+        options={{
+          tabBarLabel: "Notificaciones",
+          tabBarIcon: ({ color, size }) => (
+            <View style={styles.iconContainer}>
               <MaterialCommunityIcons
-                name="chart-line"
+                name="bell-outline"
                 color={color}
                 size={size}
               />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          options={{
-            tabBarLabel: "Dashboard",
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="wallet" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Perfil"
-          component={PerfilScreen}
-          options={{
-            tabBarLabel: "Perfil",
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons
-                name="account-cog"
-                color={color}
-                size={size}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </>
+              {notifications.length > 0 && (
+                <Badge size={16} style={styles.badge}>
+                  {notifications.length}
+                </Badge>
+              )}
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Perfil"
+        component={ProfileStackScreen}
+        options={{
+          tabBarLabel: "Perfil",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: -5,
+    right: -10,
+    backgroundColor: "red",
+  },
+});
 
 export default MainNavigator;
