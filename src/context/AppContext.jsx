@@ -8,7 +8,7 @@ import { registerForPushNotifications } from "../utils/notifications.js";
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({roleId: 1}); // Default role for testing
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [credentials, setCredentials] = useState(null);

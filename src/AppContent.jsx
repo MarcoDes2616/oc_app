@@ -12,7 +12,7 @@ const AppContent = () => {
 
   return (
     <NavigationContainer>
-      {!user ? <MainNavigator /> : <LoginScreen />}
+      {user ? <MainNavigator /> : <LoginScreen />}
     </NavigationContainer>
   );
 };

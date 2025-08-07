@@ -6,15 +6,29 @@ import useNotifications from "../hooks/useNotifications";
 import SenalesScreen from "../screens/SenalesScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import ProfileScreen from "../screens/Profile/ProfileScreen";
+import SettingsScreen from "../screens/Profile/SettingsScreen";
+import AdminScreen from "../screens/Profile/AdminScreen";
 
 const Tab = createBottomTabNavigator();
+
+const ProfileStack = createNativeStackNavigator();
+
+const ProfileStackScreen = () => (
+  <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+    <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
+    <ProfileStack.Screen name="Settings" component={SettingsScreen} />
+    <ProfileStack.Screen name="Admin" component={AdminScreen} />
+  </ProfileStack.Navigator>
+);
 
 const MainNavigator = () => {
   const { notifications } = useNotifications();
 
   return (
     <Tab.Navigator
-      initialRouteName="Señales"
+      initialRouteName="Perfil"
       screenOptions={{
         headerShown: true,
         tabBarActiveTintColor: "#6200ee",
