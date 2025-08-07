@@ -4,11 +4,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SenalesScreen from '../screens/SenalesScreen';
 import PerfilScreen from '../screens/PerfilScreen';
 import DashboardScreen from '../screens/DashboardScreen';
+import NotificationFabButton from '../components/NotificationFabButton';
 
 const Tab = createBottomTabNavigator();
 
 const MainNavigator = () => {
   return (
+    <>
+      <NotificationFabButton />
+    
     <Tab.Navigator
       initialRouteName="Senales"
       screenOptions={{
@@ -47,6 +51,7 @@ const MainNavigator = () => {
         }}
       />
     </Tab.Navigator>
+    </>
   );
 };
 
