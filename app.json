@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "oc_app",
+    "name": "Club de operativas de trading",
     "slug": "operationa-club",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "https://firebasestorage.googleapis.com/v0/b/webtradingsf.appspot.com/o/recurso%20web%2Flogo.png?alt=media&token=5824766a-fbec-46db-adfb-f7469ef1c806",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
