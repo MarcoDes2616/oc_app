@@ -6,10 +6,11 @@ import useNotifications from "../hooks/useNotifications";
 import SenalesScreen from "../screens/SenalesScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProfileScreen from "../screens/Profile/ProfileScreen";
 import SettingsScreen from "../screens/Profile/SettingsScreen";
 import AdminScreen from "../screens/Profile/AdminScreen";
+import { DataProvider } from "../context/DataContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,71 +27,58 @@ const ProfileStackScreen = () => (
 const MainNavigator = () => {
   const { notifications } = useNotifications();
 
+  const tabScreens = [
+    {
+      name: "Señales",
+      component: SenalesScreen,
+      icon: "chart-line",
+    },
+    {
+      name: "Dashboard",
+      component: DashboardScreen,
+      icon: "wallet",
+    },
+    {
+      name: "Notificaciones",
+      component: NotificationsScreen,
+      icon: "bell-outline",
+    },
+    {
+      name: "Perfil",
+      component: ProfileStackScreen,
+      icon: "account",
+    },
+  ];
+
   return (
-    <Tab.Navigator
-      initialRouteName="Perfil"
-      screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: "#6200ee",
-        tabBarStyle: { paddingBottom: 5, height: 95 },
-      }}
-    >
-      <Tab.Screen
-        name="Señales"
-        component={SenalesScreen}
-        options={{
-          tabBarLabel: "Señales",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="chart-line"
-              color={color}
-              size={size}
-            />
-          ),
+    <DataProvider>
+      <Tab.Navigator
+        initialRouteName="Perfil"
+        screenOptions={{
+          headerShown: true,
+          tabBarActiveTintColor: "#6200ee",
+          tabBarStyle: { paddingBottom: 5, height: 95 },
         }}
-      />
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{
-          tabBarLabel: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="wallet" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Notificaciones"
-        component={NotificationsScreen}
-        options={{
-          tabBarLabel: "Notificaciones",
-          tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name="bell-outline"
-                color={color}
-                size={size}
-              />
-              {notifications.length > 0 && (
-                <Badge size={16} style={styles.badge}>
-                  {notifications.length}
-                </Badge>
-              )}
-            </View>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Perfil"
-        component={ProfileStackScreen}
-        options={{
-          tabBarLabel: "Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" color={color} size={size} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
+      >
+        {tabScreens.map((screen) => (
+          <Tab.Screen
+            key={screen.name}
+            name={screen.name}
+            component={screen.component}
+            options={{
+              tabBarLabel: screen.name,
+              tabBarIcon: ({ color, size }) => (
+                <MaterialCommunityIcons
+                  name={screen.icon}
+                  color={color}
+                  size={size}
+                />
+              ),
+            }}
+          />
+        ))}
+      </Tab.Navigator>
+    </DataProvider>
   );
 };
 
