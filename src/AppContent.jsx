@@ -4,15 +4,18 @@ import { AppContext } from './context/AppContext';
 import LoginScreen from './screens/LoginScreen';
 import MainNavigator from './navigation/MainNavigator';
 import SplashScreen from './screens/SplashScreen';
+import authService from './services/authServices';
 
 const AppContent = () => {
-  const { user, isAppLoading } = useContext(AppContext);
+  const { isAppLoading } = useContext(AppContext);
+
+  const token = async() => await authService.getCurrentUser();
 
   if (isAppLoading) return <SplashScreen />;
 
   return (
     <NavigationContainer>
-      {user ? <MainNavigator /> : <LoginScreen />}
+      {token ? <MainNavigator /> : <LoginScreen />}
     </NavigationContainer>
   );
 };
