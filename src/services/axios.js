@@ -12,8 +12,14 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.response.use(
   response => response,
-  error => {
-    console.error('Error en la solicitud:', error);
+  async error => {
+    if (error.response && (error.response.status === 401)) {
+      try {
+        await authService.actionLogout();
+      } catch (logoutError) {
+        console.error('Error during logout:', logoutError);
+      }
+    } 
     return Promise.reject(error);
   }
 );
