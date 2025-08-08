@@ -1,18 +1,17 @@
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
-import { useData } from '../../../context/DataContext.jsx';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
-const ProjectsView = ({ data, loading, error }) => {
-  const { lists } = useData();
-  if (loading) return <ActivityIndicator size="large" />;
-  if (error) return <Text>Error: {error}</Text>;
+const ListsView = ({ data, loading, error }) => {
+    console.log(data);
     
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.addButton}>
-        <MaterialCommunityIcons name="plus" size={24} color="white" />
-        <Text style={styles.addButtonText}>Nueva Proyecto</Text>
-      </TouchableOpacity>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
@@ -22,17 +21,12 @@ const ProjectsView = ({ data, loading, error }) => {
             <Text style={styles.itemStatus}>{item.status}</Text>
           </View>
         )}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay proyectos disponibles</Text>
-          </View>
-        )}
       />
     </View>
   );
 };
 
-export default ProjectsView;
+export default ListsView;
 
 const styles = StyleSheet.create({
   container: {
@@ -75,3 +69,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
