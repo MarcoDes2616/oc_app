@@ -17,7 +17,7 @@
     "@react-navigation/native-stack": "^7.3.24",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
-    "expo": "~53.0.17",
+    "expo": "~53.0.20",
     "expo-local-authentication": "~16.0.5",
     "expo-notifications": "~0.31.4",
     "expo-secure-store": "~14.2.3",
