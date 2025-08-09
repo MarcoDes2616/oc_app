@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import ProjectsView from './AdminViews/ProjectsView';
 import SignalsView from './AdminViews/SignalsView';
@@ -36,22 +36,13 @@ const viewOptions = [
 
 const AdminScreen = () => {
   const [activeView, setActiveView] = useState('projects');
-  const { 
-    projects, 
-    signals, 
-    users,
-    lists, 
-    loading,
-    error 
-  } = useData();
+  const { fetchAdminData } = useData();
+
+  useEffect(() => {
+      fetchAdminData();
+    }, []);
 
   const ActiveComponent = viewOptions.find(v => v.id === activeView)?.component;
-  const dataMap = {
-    projects,
-    signals,
-    users,
-    lists
-  };
 
   return (
     <View style={styles.container}>
@@ -69,11 +60,7 @@ const AdminScreen = () => {
 
       <View style={styles.contentContainer}>
         {ActiveComponent && (
-          <ActiveComponent 
-            data={dataMap[activeView]} 
-            loading={loading}
-            error={error}
-          />
+          <ActiveComponent />
         )}
       </View>
     </View>

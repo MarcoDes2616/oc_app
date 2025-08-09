@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axiosInstance from "../services/axios";
 import { list } from "../utils/lists";
 
@@ -8,29 +8,9 @@ export const DataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [signals, setSignals] = useState([]);
-  const [lists, setLists] = useState(list);
+  const [lists, setLists] = useState({...list});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([
-          userActions.getAll(),
-          projectActions.getAll(),
-          signalActions.getAll(),
-          instrumentActions.getAll(),
-        ]);
-      } catch (err) {
-        console.error("Error fetching initial data:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInitialData();
-  }, []);
 
   // Función genérica para manejo de errores
   const handleError = (err) => {
@@ -203,7 +183,7 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
       try {
         const { data } = await axiosInstance.get("/instruments");
-        setLists((prev) => ([ ...prev, data ]));
+        setLists((prev) => ({ ...prev, instruments: data }));
         return data;
       } catch (err) {
         return handleError(err);
@@ -252,6 +232,23 @@ export const DataProvider = ({ children }) => {
     },
   };
 
+  const fetchAdminData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          userActions.getAll(),
+          projectActions.getAll(),
+          signalActions.getAll(),
+          instrumentActions.getAll(),
+        ]);
+      } catch (err) {
+        console.error("Error fetching initial data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
   return (
     <DataContext.Provider
       value={{
@@ -261,6 +258,7 @@ export const DataProvider = ({ children }) => {
         loading,
         error,
         lists,
+        fetchAdminData,
         actions: {
           users: userActions,
           projects: projectActions,

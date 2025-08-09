@@ -1,8 +1,5 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { View, StyleSheet } from "react-native";
-import { Badge } from "react-native-paper";
-import useNotifications from "../hooks/useNotifications";
 import SenalesScreen from "../screens/SenalesScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
@@ -25,7 +22,6 @@ const ProfileStackScreen = () => (
 );
 
 const MainNavigator = () => {
-  const { notifications } = useNotifications();
 
   const tabScreens = [
     {
@@ -53,7 +49,7 @@ const MainNavigator = () => {
   return (
     <DataProvider>
       <Tab.Navigator
-        initialRouteName="Perfil"
+        initialRouteName="Señales"
         screenOptions={{
           headerShown: true,
           tabBarActiveTintColor: "#6200ee",
@@ -81,17 +77,5 @@ const MainNavigator = () => {
     </DataProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  iconContainer: {
-    position: "relative",
-  },
-  badge: {
-    position: "absolute",
-    top: -5,
-    right: -10,
-    backgroundColor: "red",
-  },
-});
 
 export default MainNavigator;

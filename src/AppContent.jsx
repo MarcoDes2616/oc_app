@@ -7,15 +7,15 @@ import SplashScreen from './screens/SplashScreen';
 import authService from './services/authServices';
 
 const AppContent = () => {
-  const { isAppLoading } = useContext(AppContext);
+  const { isAppLoading, user } = useContext(AppContext);
   const [hasToken, setHasToken] = useState(false);
   const [isCheckingToken, setIsCheckingToken] = useState(true);
 
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const user = await authService.getCurrentUser();
-        setHasToken(!!user?.token);
+        const token = await authService.getCurrentUser();
+        setHasToken(!!token);
       } catch (error) {
         setHasToken(false);
       } finally {
@@ -24,8 +24,8 @@ const AppContent = () => {
     };
 
     checkToken();
-  }, []);
-
+  }, [user]);
+  
   if (isAppLoading || isCheckingToken) {
     return <SplashScreen />;
   }

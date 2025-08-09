@@ -29,8 +29,8 @@ const signalStatus = [
   { signal_status_name: "Unconfirmed" },
 ]
 
-export const list = [
+export const list = {
     markets,
     operationsTypes,
     signalStatus
-]
+}

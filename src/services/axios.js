@@ -5,10 +5,19 @@ import authService from './authServices';
 const axiosInstance = axios.create({
   baseURL: EXPO_PUBLIC_API_PROD,
   headers: {
-    'Content-Type': 'application/json',
-    "Authorization": `Bearer ${authService.getCurrentUser()}`,
+    'Content-Type': 'application/json'
   },
 });
+
+axiosInstance.interceptors.request.use(
+  async config => {
+    const token = await authService.getCurrentUser();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  }
+); 
 
 axiosInstance.interceptors.response.use(
   response => response,
