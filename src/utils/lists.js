@@ -1,32 +1,23 @@
 const markets = [
-  { market_name: "Forex" },
-  { market_name: "Indices" },
-  { market_name: "Cryptocurrencies" },
-  { market_name: "Commodities" },
+  { id: 1, market_name: "Forex" },
+  { id: 2, market_name: "Indices" },
+  { id: 3, market_name: "Cryptocurrencies" },
+  { id: 4, market_name: "Commodities" },
 ];
 
 const operationsTypes = [
-  { operation_type_name: "Buy" },
-  { operation_type_name: "Sell" },
+  { id: 1, operation_type_name: "Buy" },
+  { id: 2, operation_type_name: "Sell" },
 ];
 
 const signalStatus = [
-  { signal_status_name: "Active" },
-  { signal_status_name: "Inactive" },
-  { signal_status_name: "Completed" },
-  { signal_status_name: "Cancelled" },
-  { signal_status_name: "Pending" },
-  { signal_status_name: "Rejected" },
-  { signal_status_name: "Approved" },
-  { signal_status_name: "Expired" },
-  { signal_status_name: "Failed" },
-  { signal_status_name: "Processing" },
-  { signal_status_name: "On Hold" },
-  { signal_status_name: "Draft" },
-  { signal_status_name: "Archived" },
-  { signal_status_name: "Scheduled" },
-  { signal_status_name: "Confirmed" },
-  { signal_status_name: "Unconfirmed" },
+  { id: 1, signal_status_name: "Active" },
+  { id: 2, signal_status_name: "Inactive" },
+  { id: 3, signal_status_name: "Completed" },
+  { id: 4, signal_status_name: "Cancelled" },
+  { id: 5, signal_status_name: "Pending" },
+  { id: 6, signal_status_name: "Failed" },
+  { id: 7, signal_status_name: "Scheduled" },
 ]
 
 export const list = {
