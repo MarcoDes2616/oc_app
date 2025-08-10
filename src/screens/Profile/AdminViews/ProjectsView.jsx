@@ -27,8 +27,6 @@ const ProjectsView = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [showActions, setShowActions] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(null);
-  
-  // Form state
   const initFormData = {
     project_name: '',
     market_id: '',

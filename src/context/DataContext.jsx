@@ -8,7 +8,7 @@ export const DataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [signals, setSignals] = useState([]);
-  const [lists, setLists] = useState({...list});
+  const [lists, setLists] = useState({ ...list });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -128,10 +128,14 @@ export const DataProvider = ({ children }) => {
 
   // CRUD para Señales (misma estructura)
   const signalActions = {
-    getAll: async () => {
+    getAll: async (params = {}) => {
       setLoading(true);
       try {
-        const { data } = await axiosInstance.get("/signals");
+        const queryString = Object.keys(params).map(
+            (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+          ).join("&");
+        const url = `/signals${queryString ? `?${queryString}` : ""}`;
+        const { data } = await axiosInstance.get(url);
         setSignals(data);
         return data;
       } catch (err) {
@@ -142,6 +146,8 @@ export const DataProvider = ({ children }) => {
     },
     create: async (signalData) => {
       setLoading(true);
+      console.log(signalData);
+      
       try {
         const { data } = await axiosInstance.post("/signals", signalData);
         setSignals((prev) => [...prev, data]);
@@ -233,21 +239,21 @@ export const DataProvider = ({ children }) => {
   };
 
   const fetchAdminData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([
-          userActions.getAll(),
-          projectActions.getAll(),
-          signalActions.getAll(),
-          instrumentActions.getAll(),
-        ]);
-      } catch (err) {
-        console.error("Error fetching initial data:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    try {
+      await Promise.all([
+        userActions.getAll(),
+        projectActions.getAll(),
+        // signalActions.getAll(),
+        instrumentActions.getAll(),
+      ]);
+    } catch (err) {
+      console.error("Error fetching initial data:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <DataContext.Provider
