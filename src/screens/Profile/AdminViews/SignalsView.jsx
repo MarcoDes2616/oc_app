@@ -75,14 +75,6 @@ const SignalsView = () => {
 
   const pickImage = async () => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== "granted") {
-        alert("Se requieren permisos para acceder a la galería");
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaType?.Images,
         allowsEditing: true,

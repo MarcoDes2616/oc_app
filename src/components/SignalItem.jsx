@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,24 +7,30 @@ import {
   Image,
   Modal,
   TouchableOpacity,
-  Clipboard
-} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+  Clipboard,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
-const SignalItem = ({ 
-  item, 
+const SignalItem = ({
+  item,
   lists,
   onEdit,
   onDelete,
   showActions,
-  toggleActions 
+  toggleActions,
 }) => {
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
-  
-  const status = lists.signalStatus?.find(s => s.id === item.signal_status_id);
-  const instrument = lists.instruments?.find(i => i.id === item.instrument_id);
-  const operation = lists.operationsTypes?.find(o => o.id === item.operation_type_id);
+
+  const status = lists.signalStatus?.find(
+    (s) => s.id === item.signal_status_id
+  );
+  const instrument = lists.instruments?.find(
+    (i) => i.id === item.instrument_id
+  );
+  const operation = lists.operationsTypes?.find(
+    (o) => o.id === item.operation_type_id
+  );
 
   const copyToClipboard = (text, fieldName) => {
     if (!text) return;
@@ -34,7 +40,12 @@ const SignalItem = ({
   };
 
   const isValidUrl = (url) => {
-    return url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://'));
+    return (
+      typeof url === "string" &&
+      (url.startsWith("http://") ||
+        url.startsWith("https://") ||
+        url.startsWith("file://"))
+    );
   };
 
   return (
@@ -44,53 +55,55 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text style={[styles.statusText, { color: status?.color || '#757575' }]}>
+        <Text
+          style={[styles.statusText, { color: status?.color || "#757575" }]}
+        >
           {status?.signal_status_name}
         </Text>
       </View>
 
       {/* Valores copiables */}
       <View style={styles.valuesContainer}>
-        <Pressable 
+        <Pressable
           style={styles.valueItem}
-          onPress={() => copyToClipboard(item.entry_point, 'entry')}
+          onPress={() => copyToClipboard(item.entry_point, "entry")}
         >
           <Text style={styles.valueLabel}>Entrada:</Text>
           <View style={styles.valueContent}>
-            <Text style={styles.valueText}>{item.entry_point || 'N/A'}</Text>
-            <MaterialIcons 
-              name="content-copy" 
-              size={16} 
-              color="#6200ee" 
+            <Text style={styles.valueText}>{item.entry_point || "N/A"}</Text>
+            <MaterialIcons
+              name="content-copy"
+              size={16}
+              color="#6200ee"
               style={styles.copyIcon}
             />
-            {copiedField === 'entry' && (
+            {copiedField === "entry" && (
               <Text style={styles.copiedText}>Copiado!</Text>
             )}
           </View>
         </Pressable>
 
-        <Pressable 
+        <Pressable
           style={styles.valueItem}
-          onPress={() => copyToClipboard(item.sl_price, 'sl')}
+          onPress={() => copyToClipboard(item.sl_price, "sl")}
         >
           <Text style={styles.valueLabel}>SL:</Text>
           <View style={styles.valueContent}>
-            <Text style={styles.valueText}>{item.sl_price || 'N/A'}</Text>
-            <MaterialIcons 
-              name="content-copy" 
-              size={16} 
-              color="#6200ee" 
+            <Text style={styles.valueText}>{item.sl_price || "N/A"}</Text>
+            <MaterialIcons
+              name="content-copy"
+              size={16}
+              color="#6200ee"
               style={styles.copyIcon}
             />
-            {copiedField === 'sl' && (
+            {copiedField === "sl" && (
               <Text style={styles.copiedText}>Copiado!</Text>
             )}
           </View>
         </Pressable>
-        <Pressable 
+        <Pressable
           style={styles.valueItem}
-          onPress={() => copyToClipboard(item.sl_price, 'sl')}
+          onPress={() => copyToClipboard(item.sl_price, "sl")}
         >
           <Text style={styles.valueLabel}>Target:</Text>
           <View style={styles.valueContent}>
@@ -103,8 +116,12 @@ const SignalItem = ({
       <View style={styles.interestZone}>
         <Text style={styles.zoneLabel}>Zona de interés:</Text>
         <View style={styles.zoneValues}>
-          <Text style={styles.zoneText}>Mín: {item.price_range_min || 'N/A'}</Text>
-          <Text style={styles.zoneText}>Máx: {item.price_range_max || 'N/A'}</Text>
+          <Text style={styles.zoneText}>
+            Mín: {item.price_range_min || "N/A"}
+          </Text>
+          <Text style={styles.zoneText}>
+            Máx: {item.price_range_max || "N/A"}
+          </Text>
         </View>
       </View>
 
@@ -112,8 +129,8 @@ const SignalItem = ({
       {isValidUrl(item.image_reference) && (
         <>
           <Pressable onPress={() => setFullscreenImage(true)}>
-            <Image 
-              source={{ uri: item.image_reference }} 
+            <Image
+              source={{ uri: item.image_reference }}
               style={styles.image}
               resizeMode="contain"
             />
@@ -125,12 +142,12 @@ const SignalItem = ({
             transparent={true}
             onRequestClose={() => setFullscreenImage(false)}
           >
-            <Pressable 
+            <Pressable
               style={styles.fullscreenContainer}
               onPress={() => setFullscreenImage(false)}
             >
-              <Image 
-                source={{ uri: item.image_reference }} 
+              <Image
+                source={{ uri: item.image_reference }}
                 style={styles.fullscreenImage}
                 resizeMode="contain"
               />
@@ -140,7 +157,7 @@ const SignalItem = ({
       )}
 
       {/* Menú de acciones */}
-      <Pressable 
+      <Pressable
         style={styles.moreButton}
         onPress={() => toggleActions(item.id)}
       >
@@ -149,19 +166,18 @@ const SignalItem = ({
 
       {showActions === item.id && (
         <View style={styles.actionsMenu}>
-          <Pressable 
-            style={styles.actionButton}
-            onPress={() => onEdit(item)}
-          >
+          <Pressable style={styles.actionButton} onPress={() => onEdit(item)}>
             <MaterialIcons name="edit" size={18} color="#6200ee" />
             <Text style={styles.actionText}>Editar</Text>
           </Pressable>
-          <Pressable 
+          <Pressable
             style={styles.actionButton}
             onPress={() => onDelete(item.id)}
           >
             <MaterialIcons name="delete" size={18} color="#ff0000" />
-            <Text style={[styles.actionText, { color: "#ff0000" }]}>Eliminar</Text>
+            <Text style={[styles.actionText, { color: "#ff0000" }]}>
+              Eliminar
+            </Text>
           </Pressable>
         </View>
       )}
@@ -171,34 +187,34 @@ const SignalItem = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f3e5ff',
+    backgroundColor: "#f3e5ff",
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
   instrumentText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   statusText: {
     fontSize: 14,
     marginRight: 25,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   valuesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   valueItem: {
@@ -207,16 +223,16 @@ const styles = StyleSheet.create({
   },
   valueLabel: {
     fontSize: 14,
-    color: '#757575',
+    color: "#757575",
     marginBottom: 4,
   },
   valueContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   valueText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     marginRight: 6,
   },
   copyIcon: {
@@ -224,54 +240,54 @@ const styles = StyleSheet.create({
   },
   copiedText: {
     fontSize: 12,
-    color: '#4CAF50',
-    fontStyle: 'italic',
-    backgroundColor: '#E8F5E9',
+    color: "#4CAF50",
+    fontStyle: "italic",
+    backgroundColor: "#E8F5E9",
     padding: 2,
     borderRadius: 4,
     zIndex: 1,
-    position: 'absolute',
+    position: "absolute",
     top: -20,
     left: 0,
-    width: '100%',
-    textAlign: 'center',
+    width: "100%",
+    textAlign: "center",
   },
   interestZone: {
     marginBottom: 12,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: "#eee",
   },
   zoneLabel: {
     fontSize: 14,
-    color: '#757575',
+    color: "#757575",
     marginBottom: 4,
   },
   zoneValues: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 24,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   zoneText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   targetContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   targetLabel: {
     fontSize: 14,
-    color: '#757575',
+    color: "#757575",
   },
   targetText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 180,
     borderRadius: 8,
     marginTop: 8,
@@ -279,28 +295,28 @@ const styles = StyleSheet.create({
   },
   fullscreenContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   fullscreenImage: {
-    width: '100%',
-    height: '80%',
+    width: "100%",
+    height: "80%",
   },
   moreButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
   },
   actionsMenu: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     right: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 8,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -308,8 +324,8 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 6,
     paddingHorizontal: 10,
   },

@@ -19,6 +19,24 @@ export const DataProvider = ({ children }) => {
     throw err;
   };
 
+  const buildFormData = (data, convertKey) => {
+    const formData = new FormData();
+
+    Object.keys(data).forEach((key) => {
+      if (key === convertKey && data[key]) {
+        formData.append(key, {
+          uri: data[key],
+          type: "image/jpeg",
+          name: "photo.jpg",
+        });
+      } else {
+        formData.append(key, data[key]);
+      }
+    });
+
+    return formData;
+  };
+
   // CRUD para Usuarios
   const userActions = {
     getAll: async () => {
@@ -131,9 +149,12 @@ export const DataProvider = ({ children }) => {
     getAll: async (params = {}) => {
       setLoading(true);
       try {
-        const queryString = Object.keys(params).map(
-            (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-          ).join("&");
+        const queryString = Object.keys(params)
+          .map(
+            (key) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+          )
+          .join("&");
         const url = `/signals${queryString ? `?${queryString}` : ""}`;
         const { data } = await axiosInstance.get(url);
         setSignals(data);
@@ -146,10 +167,14 @@ export const DataProvider = ({ children }) => {
     },
     create: async (signalData) => {
       setLoading(true);
-      console.log(signalData);
-      
+      if(signalData.image_reference) {
+        signalData = buildFormData(signalData, "image_reference");
+      }
       try {
-        const { data } = await axiosInstance.post("/signals", signalData);
+        const { data } = await axiosInstance.post("/signals", signalData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
         setSignals((prev) => [...prev, data]);
         return data;
       } catch (err) {
@@ -159,9 +184,9 @@ export const DataProvider = ({ children }) => {
       }
     },
     update: async (id, signalData) => {
-      setLoading(true);
+      const { image_reference, ...restOfData } = signalData;
       try {
-        const { data } = await axiosInstance.put(`/signals/${id}`, signalData);
+        const { data } = await axiosInstance.put(`/signals/${id}`, restOfData);
         setSignals((prev) => prev.map((s) => (s.id === id ? data : s)));
         return data;
       } catch (err) {
