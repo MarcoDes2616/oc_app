@@ -32,7 +32,7 @@ const AppContent = () => {
 
   return (
     <NavigationContainer>
-      {hasToken ? <MainNavigator /> : <LoginScreen />}
+      {!hasToken ? <MainNavigator /> : <LoginScreen />}
     </NavigationContainer>
   );
 };
