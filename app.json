@@ -4,11 +4,11 @@
     "slug": "operationa-club",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "https://firebasestorage.googleapis.com/v0/b/webtradingsf.appspot.com/o/recurso%20web%2Flogo.png?alt=media&token=5824766a-fbec-46db-adfb-f7469ef1c806",
+    "icon": "https://firebasestorage.googleapis.com/v0/b/webtradingsf.appspot.com/o/recurso%20web%2F512.png?alt=media&token=cfa7e433-c2f9-4888-a2f3-eaa97434c486",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "https://firebasestorage.googleapis.com/v0/b/webtradingsf.appspot.com/o/recurso%20web%2F512.png?alt=media&token=cfa7e433-c2f9-4888-a2f3-eaa97434c486",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
