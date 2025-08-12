@@ -7,8 +7,8 @@ import BiometricToggle from "../../components/BiometricToggle";
 import { MaterialIcons } from '@expo/vector-icons';
 
 const SettingsScreen = () => {
-  const { logout, deletePushToken } = useContext(AppContext);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { logout, deletePushToken, user, enablePushNotifications } = useContext(AppContext);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(!!user?.pushToken);
   const [loading, setLoading] = useState(false);
 
   const handleToggleNotifications = async (value) => {
@@ -17,8 +17,7 @@ const SettingsScreen = () => {
       if (!value) {
         await deletePushToken();
       } else {
-        // Activar notificaciones (aquí deberías implementar la lógica para registrar el token nuevamente)
-        // await actions.system.registerPushToken();
+        await enablePushNotifications();
       }
       setNotificationsEnabled(value);
     } catch (error) {
@@ -28,13 +27,13 @@ const SettingsScreen = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Sección de Perfil */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <MaterialIcons name="person" size={20} color="#6200ee" /> Perfil
+          {/* <MaterialIcons name="person" size={20} color="#6200ee" />  */}
         </Text>
         <ProfileMenu />
       </View>
@@ -85,7 +84,8 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
+    paddingVertical: 2,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
   section: {

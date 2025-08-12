@@ -8,7 +8,7 @@ import { registerForPushNotifications } from "../utils/notifications.js";
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [user, setUser] = useState({roleId: 1}); // Default role for testing
+  const [user, setUser] = useState();
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [credentials, setCredentials] = useState(null);
@@ -36,13 +36,25 @@ export const AppProvider = ({ children }) => {
     setIsBiometricAvailable(compatible && enrolled);
   };
 
+  const enablePushNotifications = async () => {
+    try {
+      const pushToken = await registerForPushNotifications();
+
+      if (pushToken) {
+        await axiosInstance.post("/system/save-push-token", {
+          userId: user.id,
+          pushToken,
+        });
+      }
+    } catch (error) {}
+  };
+
   const login = async ({ email, login_token }) => {
     try {
       const response = await axiosInstance.post("/system/login", {
         email,
         login_token,
       });
-
       const { token, user } = response.data;
       setUser(user);
 
@@ -50,14 +62,7 @@ export const AppProvider = ({ children }) => {
         await SecureStore.setItemAsync("user_token", token);
         setCredentials({ email, login_token });
       }
-      const pushToken = await registerForPushNotifications();
-      
-      if (pushToken) {
-        await axiosInstance.post("/system/save-push-token", {
-          userId: user.id,
-          pushToken,
-        });
-      }
+      await enablePushNotifications();
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error de autenticación", "Token inválido o expirado.");
@@ -73,6 +78,7 @@ export const AppProvider = ({ children }) => {
     if (result.success) {
       if (Platform.OS !== "web") {
         const stored = await SecureStore.getItemAsync("biometric_credentials");
+
         if (stored) {
           const creds = JSON.parse(stored);
           await login(creds);
@@ -93,8 +99,8 @@ export const AppProvider = ({ children }) => {
       const token = await SecureStore.getItemAsync("user_token");
       if (token) {
         try {
-          const response = await axiosInstance.get("system/me");
-          setUser(response.data);
+          const { data } = await axiosInstance.get("system/me");
+          setUser(data.user);
         } catch (error) {
           logout();
           await SecureStore.deleteItemAsync("biometric_credentials");
@@ -115,15 +121,14 @@ export const AppProvider = ({ children }) => {
   };
 
   const deletePushToken = async () => {
-  try {
-    const response = await axiosInstance.post('/system/delete-push-token');
-    return response.data;
-  } catch (error) {
-    console.error('Error deleting push token:', error);
-    throw error;
-  }
-};
-
+    try {
+      const { data } = await axiosInstance.post("/system/delete-push-token");
+      setUser(data.user);
+    } catch (error) {
+      console.error("Error deleting push token:", error);
+      throw error;
+    }
+  };
 
   const functions = {
     user,
@@ -133,7 +138,8 @@ export const AppProvider = ({ children }) => {
     logout,
     isAppLoading,
     credentials,
-    deletePushToken
+    deletePushToken,
+    enablePushNotifications,
   };
 
   return (

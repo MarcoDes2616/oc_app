@@ -1,9 +1,11 @@
 import { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../context/AppContext';
 import axiosInstance from '../services/axios.js';
+import * as SecureStore from "expo-secure-store";
+import * as LocalAuthentication from 'expo-local-authentication';
 
 const STORAGE_KEY = 'user_email';
 
@@ -12,6 +14,7 @@ const LoginScreen = () => {
   const [loginToken, setLoginToken] = useState('');
   const [tokenRequested, setTokenRequested] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
 
   const { login, loginWithBiometrics } = useContext(AppContext);
 
@@ -22,20 +25,50 @@ const LoginScreen = () => {
         if (storedEmail) {
           setEmail(storedEmail);
         }
-      } catch (err) {
-        console.warn('No se pudo cargar el correo almacenado:', err);
-      }
 
-      const result = await loginWithBiometrics();
-      if (result.success) {
-        Alert.alert('Bienvenido', 'Autenticación biométrica exitosa.');
-      } else if (result.error && result.error !== 'Falló la autenticación biométrica') {
-        console.warn('Biometric login skipped:', result.error);
+        // Verificar si hay credenciales biométricas guardadas
+        const stored = await SecureStore.getItemAsync("biometric_credentials");
+        setIsBiometricAvailable(!!stored);
+
+        // Solo intentar autenticación biométrica si hay credenciales almacenadas
+        if (stored) {
+          const biometricAuth = await LocalAuthentication.hasHardwareAsync() && 
+                              await LocalAuthentication.isEnrolledAsync();
+          
+          if (biometricAuth) {
+            const result = await loginWithBiometrics();
+            if (result.success) {
+              Alert.alert('Bienvenido', 'Autenticación biométrica exitosa.');
+            } else if (result.error) {
+              console.log('Autenticación biométrica fallida o cancelada:', result.error);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Error en inicialización:', err);
       }
     };
 
     init();
   }, []);
+
+  const handleBiometricLogin = async () => {
+    if (!isBiometricAvailable) return;
+    try {
+      setLoading(true);
+      const result = await loginWithBiometrics();
+      if (result.success) {
+        Alert.alert('Bienvenido', 'Autenticación biométrica exitosa.');
+      } else {
+        Alert.alert('Autenticación fallida', result.error || 'No se pudo completar la autenticación biométrica');
+      }
+    } catch (error) {
+      console.error('Error en autenticación biométrica:', error);
+      Alert.alert('Error', 'Ocurrió un problema con la autenticación biométrica');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const requestLoginToken = async () => {
     if (!email.trim()) {
@@ -92,12 +125,24 @@ const LoginScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
+      {/* Icono de autenticación biométrica */}
+      {isBiometricAvailable && <IconButton
+        icon="fingerprint"
+        size={24}
+        style={styles.biometricIcon}
+        onPress={handleBiometricLogin}
+        disabled={loading}
+        accessibilityLabel="Autenticación biométrica"
+      />}
+
+      {/* Icono de reinicio (existente) */}
       {tokenRequested && (
         <IconButton
           icon="refresh"
           size={24}
           style={styles.resetIcon}
           onPress={resetLogin}
+          disabled={loading}
           accessibilityLabel="Reiniciar proceso de login"
         />
       )}
@@ -111,7 +156,7 @@ const LoginScreen = () => {
         style={styles.input}
         autoCapitalize="none"
         keyboardType="email-address"
-        disabled={tokenRequested}
+        disabled={tokenRequested || loading}
       />
 
       {!tokenRequested ? (
@@ -144,6 +189,7 @@ const LoginScreen = () => {
             style={styles.input}
             keyboardType="default"
             autoCapitalize="none"
+            disabled={loading}
           />
           <Button
             mode="contained"
@@ -185,6 +231,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     right: 20,
+    zIndex: 1,
+  },
+  biometricIcon: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
     zIndex: 1,
   },
 });
