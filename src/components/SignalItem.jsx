@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Image,
   Modal,
-  TouchableOpacity,
   Clipboard,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -18,6 +17,7 @@ const SignalItem = ({
   onDelete,
   showActions,
   toggleActions,
+  hideActions,
 }) => {
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
@@ -157,12 +157,14 @@ const SignalItem = ({
       )}
 
       {/* Menú de acciones */}
-      <Pressable
-        style={styles.moreButton}
-        onPress={() => toggleActions(item.id)}
-      >
-        <MaterialIcons name="more-vert" size={24} color="#757575" />
-      </Pressable>
+      {!hideActions && (
+        <Pressable
+          style={styles.moreButton}
+          onPress={() => toggleActions(item.id)}
+        >
+          <MaterialIcons name="more-vert" size={24} color="#757575" />
+        </Pressable>
+      )}
 
       {showActions === item.id && (
         <View style={styles.actionsMenu}>

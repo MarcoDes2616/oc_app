@@ -269,7 +269,6 @@ export const DataProvider = ({ children }) => {
       await Promise.all([
         userActions.getAll(),
         projectActions.getAll(),
-        // signalActions.getAll(),
         instrumentActions.getAll(),
       ]);
     } catch (err) {

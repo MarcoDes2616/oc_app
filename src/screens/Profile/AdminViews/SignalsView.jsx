@@ -17,6 +17,8 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useData } from "../../../context/DataContext";
 import * as ImagePicker from "expo-image-picker";
 import SignalItem from "../../../components/SignalItem";
+import ProjectSelectionView from "../../../components/ProjectSelectionView";
+import SignalsListView from "../../../components/SignalsListView";
 
 const SignalsView = () => {
   const { lists, actions, loading, projects } = useData();
@@ -159,129 +161,40 @@ const SignalsView = () => {
     setFormData({ ...formData, is_successful: !formData.is_successful });
   };
 
+  const handleBack = () => {
+    setSelectedProject(null);
+  };
+
   if (loading && !refreshing) return <ActivityIndicator size="large" />;
 
   // Vista de selección de proyecto
   if (!selectedProject) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Seleccione un proyecto</Text>
-        <Text style={styles.subtitle}>Para ver y gestionar sus señales</Text>
-
-        <FlatList
-          data={projects?.filter((p) => p.status) || []}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.projectsList}
-          renderItem={({ item }) => (
-            <Pressable
-              style={styles.projectItem}
-              onPress={() => setSelectedProject(item)}
-            >
-              <Text style={styles.projectName}>{item.project_name}</Text>
-              <Text style={styles.projectMarket}>
-                {
-                  lists.markets?.find((m) => m.id === item.market_id)
-                    ?.market_name
-                }
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#6200ee" />
-            </Pressable>
-          )}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No hay proyectos activos</Text>
-            </View>
-          )}
-        />
-      </View>
+      <ProjectSelectionView
+        projects={projects}
+        lists={lists}
+        onSelectProject={setSelectedProject}
+      />
     );
   }
 
   // Vista principal de señales
   return (
-    <View style={styles.container}>
-      {/* Header con información del proyecto */}
-      <View style={styles.projectHeader}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => {
-            setSelectedProject(null);
-            setFormData(initFormData);
-          }}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#6200ee" />
-        </Pressable>
-        <View style={styles.projectInfo}>
-          <Text style={styles.projectTitle}>
-            {selectedProject.project_name}
-          </Text>
-          <Text style={styles.projectDates}>
-            {new Date(selectedProject.init_date).toLocaleDateString()} -
-            {selectedProject.end_date
-              ? new Date(selectedProject.end_date).toLocaleDateString()
-              : " Presente"}
-          </Text>
-        </View>
-      </View>
-
-      {/* Filtros por estado */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-      >
-        <Pressable
-          style={[styles.filterButton, !filterStatus && styles.activeFilter]}
-          onPress={() => setFilterStatus(null)}
-        >
-          <Text>Todas</Text>
-        </Pressable>
-
-        {lists.signalStatus?.map((status) => (
-          <Pressable
-            key={status.id}
-            style={[
-              styles.filterButton,
-              filterStatus === status.id && styles.activeFilter,
-            ]}
-            onPress={() => setFilterStatus(status.id)}
-          >
-            <Text>{status.signal_status_name}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      {/* Botón para agregar nueva señal */}
-      <TouchableOpacity style={styles.addButton} onPress={handleAddSignal}>
-        <MaterialCommunityIcons name="plus" size={24} color="white" />
-        <Text style={styles.addButtonText}>Nueva Señal</Text>
-      </TouchableOpacity>
-
-      {/* Lista de señales */}
-      <FlatList
-        data={signals}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={fetchSignals} />
-        }
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <SignalItem
-            item={item}
-            lists={lists}
-            onEdit={handleEditSignal}
-            onDelete={handleDeleteSignal}
-            showActions={showActions}
-            toggleActions={toggleActions}
-          />
-        )}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay señales disponibles</Text>
-            <Text style={styles.emptySubtext}>
-              Para el proyecto seleccionado
-            </Text>
-          </View>
-        )}
+    <>
+      <SignalsListView
+        selectedProject={selectedProject}
+        signals={signals}
+        lists={lists}
+        refreshing={refreshing}
+        onRefresh={fetchSignals}
+        onBack={handleBack}
+        hideActions={true}
+        setFilterStatus={setFilterStatus}
+        filterStatus={filterStatus}
+        toggleActions={toggleActions}
+        onEdit={handleEditSignal}
+        onDelete={handleDeleteSignal}
+        showActions={showActions}
       />
 
       {/* Modal del formulario */}
@@ -493,7 +406,7 @@ const SignalsView = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </>
   );
 };
 
