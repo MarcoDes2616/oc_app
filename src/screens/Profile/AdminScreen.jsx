@@ -6,6 +6,7 @@ import UsersView from './AdminViews/UsersView';
 import { useData } from '../../context/DataContext';
 import ViewSelectorButton from '../../components/ViewSelectorButton';
 import ListsView from './AdminViews/ListsView';
+import NotificationSender from './AdminViews/NotificationSender';
 
 const viewOptions = [
   {
@@ -25,6 +26,12 @@ const viewOptions = [
     icon: 'account-group',
     label: 'Usuarios',
     component: UsersView
+  },
+   {
+    id: "notifications",
+    icon: "bell",
+    label: "Notificación",
+    component: NotificationSender
   },
   {
     id: "lists",

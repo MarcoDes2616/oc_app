@@ -279,6 +279,16 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const sendCustomNotification = async (notificationData) => {
+  try {
+    const response = await axiosInstance.post('/system/send-custom-notification', notificationData);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    throw error;
+  }
+};
+
   return (
     <DataContext.Provider
       value={{
@@ -289,6 +299,7 @@ export const DataProvider = ({ children }) => {
         error,
         lists,
         fetchAdminData,
+        sendCustomNotification,
         actions: {
           users: userActions,
           projects: projectActions,
