@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Image,
   Modal,
-  Clipboard,
+  Linking,
+  Alert,
+  Clipboard
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -21,16 +23,23 @@ const SignalItem = ({
 }) => {
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+  
+  const openMT5WithParameters = async () => {
+   try {
+    const mt5Installed = await Linking.canOpenURL('metatrader5://');
+    
+    if (mt5Installed) {
+      await Linking.openURL('metatrader5://');
+    }
+  } catch (error) {
+    console.error("Error al abrir MT5:", error);
+    Alert.alert('Error', 'No se pudo abrir MetaTrader 5');
+  }
+  };
 
-  const status = lists.signalStatus?.find(
-    (s) => s.id === item.signal_status_id
-  );
-  const instrument = lists.instruments?.find(
-    (i) => i.id === item.instrument_id
-  );
-  const operation = lists.operationsTypes?.find(
-    (o) => o.id === item.operation_type_id
-  );
+  const status = lists.signalStatus?.find((s) => s.id === item.signal_status_id);
+  const instrument = lists.instruments?.find((i) => i.id === item.instrument_id);
+  const operation = lists.operationsTypes?.find((o) => o.id === item.operation_type_id);
 
   const copyToClipboard = (text, fieldName) => {
     if (!text) return;
@@ -55,12 +64,19 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text
-          style={[styles.statusText, { color: status?.color || "#757575" }]}
-        >
+        <Text style={[styles.statusText, { color: status?.color || "#757575" }]}>
           {status?.signal_status_name}
         </Text>
       </View>
+
+      {/* Botón MT5 */}
+      <Pressable 
+        style={styles.mt5Button}
+        onPress={openMT5WithParameters}
+      >
+        <MaterialIcons name="launch" size={20} color="#43A047" />
+        <Text style={styles.mt5ButtonText}>Configurar en MT5</Text>
+      </Pressable>
 
       {/* Valores copiables */}
       <View style={styles.valuesContainer}>
@@ -101,13 +117,23 @@ const SignalItem = ({
             )}
           </View>
         </Pressable>
+
         <Pressable
           style={styles.valueItem}
-          onPress={() => copyToClipboard(item.sl_price, "sl")}
+          onPress={() => copyToClipboard(item.expected_target, "target")}
         >
           <Text style={styles.valueLabel}>Target:</Text>
           <View style={styles.valueContent}>
-            <Text style={styles.targetText}>{item.expected_target}</Text>
+            <Text style={styles.targetText}>{item.expected_target || "N/A"}</Text>
+            <MaterialIcons
+              name="content-copy"
+              size={16}
+              color="#6200ee"
+              style={styles.copyIcon}
+            />
+            {copiedField === "target" && (
+              <Text style={styles.copiedText}>Copiado!</Text>
+            )}
           </View>
         </Pressable>
       </View>
@@ -136,7 +162,6 @@ const SignalItem = ({
             />
           </Pressable>
 
-          {/* Modal para imagen a pantalla completa */}
           <Modal
             visible={fullscreenImage}
             transparent={true}
@@ -214,6 +239,20 @@ const styles = StyleSheet.create({
     marginRight: 25,
     fontWeight: "500",
   },
+  mt5Button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8F5E9',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  mt5ButtonText: {
+    color: '#43A047',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
   valuesContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -236,6 +275,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginRight: 6,
+  },
+  targetText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
   },
   copyIcon: {
     marginRight: 4,
@@ -272,20 +316,6 @@ const styles = StyleSheet.create({
   },
   zoneText: {
     fontSize: 14,
-    color: "#333",
-  },
-  targetContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  targetLabel: {
-    fontSize: 14,
-    color: "#757575",
-  },
-  targetText: {
-    fontSize: 16,
-    fontWeight: "500",
     color: "#333",
   },
   image: {

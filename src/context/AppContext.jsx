@@ -93,9 +93,7 @@ export const AppProvider = ({ children }) => {
       const token = await SecureStore.getItemAsync("user_token");
       if (token) {
         try {
-          const response = await axiosInstance.get("system/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const response = await axiosInstance.get("system/me");
           setUser(response.data);
         } catch (error) {
           logout();
@@ -116,6 +114,17 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const deletePushToken = async () => {
+  try {
+    const response = await api.post('/system/delete-push-token');
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting push token:', error);
+    throw error;
+  }
+};
+
+
   const functions = {
     user,
     login,
@@ -124,6 +133,7 @@ export const AppProvider = ({ children }) => {
     logout,
     isAppLoading,
     credentials,
+    deletePushToken
   };
 
   return (
