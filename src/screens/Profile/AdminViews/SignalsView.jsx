@@ -34,16 +34,16 @@ const SignalsView = () => {
 
   // Estado inicial del formulario
   const initFormData = {
-    project_id: selectedProject?.id || "",
-    instrument_id: 1,
-    operation_type_id: 1,
+    project_id: selectedProject?.id,
+    instrument_id: "",
+    operation_type_id: "",
     image_reference: null,
-    price_range_min: "6225",
-    price_range_max: "6250",
-    expected_target: "292",
-    entry_point: "6228",
-    sl_price: "6284",
-    signal_status_id: 5,
+    price_range_min: "",
+    price_range_max: "",
+    expected_target: "",
+    entry_point: "",
+    sl_price: "",
+    signal_status_id: 5, // Estado por defecto
     is_successful: false,
   };
 
