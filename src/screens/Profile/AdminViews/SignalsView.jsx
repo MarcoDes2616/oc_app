@@ -180,7 +180,13 @@ const SignalsView = () => {
 
   // Vista principal de señales
   return (
-    <>
+    <View style={styles.container}>
+      {/* Botón para agregar nueva señal */}
+      <TouchableOpacity style={styles.addButton} onPress={handleAddSignal}>
+        <MaterialCommunityIcons name="plus" size={24} color="white" />
+        <Text style={styles.addButtonText}>Nueva Señal</Text>
+      </TouchableOpacity>
+
       <SignalsListView
         selectedProject={selectedProject}
         signals={signals}
@@ -188,12 +194,12 @@ const SignalsView = () => {
         refreshing={refreshing}
         onRefresh={fetchSignals}
         onBack={handleBack}
-        hideActions={true}
+        hideActions={false}
         setFilterStatus={setFilterStatus}
         filterStatus={filterStatus}
         toggleActions={toggleActions}
-        onEdit={handleEditSignal}
         onDelete={handleDeleteSignal}
+        onEdit={handleEditSignal}
         showActions={showActions}
       />
 
@@ -406,7 +412,7 @@ const SignalsView = () => {
           </View>
         </View>
       </Modal>
-    </>
+    </View>
   );
 };
 

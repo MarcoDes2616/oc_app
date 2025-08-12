@@ -17,7 +17,7 @@ const SignalsListView = ({
   refreshing,
   onRefresh,
   onBack,
-  hideActions = true,
+  hideActions,
   setFilterStatus,
   filterStatus,
   toggleActions,
@@ -28,7 +28,6 @@ const SignalsListView = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Header con información del proyecto */}
       <View style={styles.projectHeader}>
         <Pressable style={styles.backButton} onPress={onBack}>
           <MaterialIcons name="arrow-back" size={24} color="#6200ee" />
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     marginBottom: 16,
-    height: 20,
+    height: 46,
   },
   filterButton: {
     paddingHorizontal: 16,
