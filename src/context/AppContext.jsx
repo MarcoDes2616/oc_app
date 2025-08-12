@@ -116,7 +116,7 @@ export const AppProvider = ({ children }) => {
 
   const deletePushToken = async () => {
   try {
-    const response = await api.post('/system/delete-push-token');
+    const response = await axiosInstance.post('/system/delete-push-token');
     return response.data;
   } catch (error) {
     console.error('Error deleting push token:', error);
