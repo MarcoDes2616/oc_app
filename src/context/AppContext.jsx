@@ -65,8 +65,7 @@ export const AppProvider = ({ children }) => {
       }
       await enablePushNotifications();
     } catch (error) {
-      console.error("Login error:", error);
-      Alert.alert("Error de autenticación", "Token inválido o expirado.");
+      throw error;
     }
   };
 
@@ -112,6 +111,7 @@ export const AppProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      await axiosInstance.post("/system/logout")
       await authService.actionLogout()
       setUser(null);
     } catch (error) {

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { TextInput, Button, Text, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../context/AppContext';
@@ -15,6 +15,7 @@ const LoginScreen = () => {
   const [tokenRequested, setTokenRequested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+  const [activeSessionInfo, setActiveSessionInfo] = useState(null);
 
   const { login, loginWithBiometrics } = useContext(AppContext);
 
@@ -70,7 +71,7 @@ const LoginScreen = () => {
     }
   };
 
-  const requestLoginToken = async () => {
+   const requestLoginToken = async () => {
     if (!email.trim()) {
       Alert.alert('Error', 'Por favor ingresa un correo válido.');
       return;
@@ -80,6 +81,15 @@ const LoginScreen = () => {
       setLoading(true);
       const response = await axiosInstance.post('/system/request_auth_token', { email: email.trim() });
 
+      if (response.status === 403 && response.data.code === 'SESSION_ACTIVE') {
+        // Hay una sesión activa, mostramos la información
+        setActiveSessionInfo({
+          lastLogin: response.data.session.last_login,
+          message: response.data.message
+        });
+        return;
+      }
+
       if (response.data.success) {
         await AsyncStorage.setItem(STORAGE_KEY, email.trim());
         setTokenRequested(true);
@@ -88,29 +98,89 @@ const LoginScreen = () => {
         Alert.alert('Error', response.data.message || 'No se pudo solicitar el token.');
       }
     } catch (err) {
-      console.error('Error solicitando token:', err);
-      Alert.alert('Error', 'Ocurrió un error al solicitar el token.');
+      if (err.response?.status === 403 && err.response?.data?.code === 'SESSION_INACTIVE') {
+        setActiveSessionInfo({
+          lastLogin: err.response.data.session.last_login,
+          message: err.response.data.message
+        });
+      } else {
+        console.error('Error solicitando token:', err);
+        Alert.alert('Error', 'Ocurrió un error al solicitar el token.');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleForceLogin = async () => {
+    Alert.alert(
+      'Cerrar sesión activa',
+      '¿Estás seguro que deseas cerrar la sesión activa e iniciar una nueva?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        { 
+          text: 'Sí, continuar', 
+          onPress: async () => {
+            try {
+              setLoading(true);
+              // Enviamos un parámetro especial para forzar el login
+              const response = await axiosInstance.post('/system/request_auth_token', { 
+                email: email.trim(),
+                force_login: true
+              });
+              
+              if (response.data.success) {
+                await AsyncStorage.setItem(STORAGE_KEY, email.trim());
+                setTokenRequested(true);
+                setActiveSessionInfo(null);
+                Alert.alert('Éxito', 'Se ha enviado un token a tu correo.');
+              }
+            } catch (error) {
+              console.error('Error forzando login:', error);
+              Alert.alert('Error', 'No se pudo forzar el inicio de sesión.');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleLogin = async () => {
-    if (!email.trim() || !loginToken.trim()) {
-      Alert.alert('Error', 'Debes completar ambos campos.');
-      return;
-    }
+  if (!email.trim() || !loginToken.trim()) {
+    Alert.alert('Error', 'Debes completar ambos campos.');
+    return;
+  }
+  try {
+    setLoading(true);
+    await AsyncStorage.setItem(STORAGE_KEY, email.trim());
+    
+    await login({ 
+      email: email.trim(), 
+      login_token: loginToken.trim() 
+    });
+    setActiveSessionInfo(null);
 
-    try {
-      setLoading(true);
-      await AsyncStorage.setItem(STORAGE_KEY, email.trim());
-      await login({ email: email.trim(), login_token: loginToken.trim() });
-    } catch (err) {
-      Alert.alert('Error', 'No se pudo iniciar sesión.');
-    } finally {
-      setLoading(false);
+  } catch (err) {
+    if (err.response?.status === 403 && err.response?.data?.code === 'SESSION_INACTIVE') {
+      setActiveSessionInfo({
+        lastLogin: err.response.data.session.last_login,
+        message: err.response.data.message
+      });
+    } else {
+      Alert.alert(
+        'Error', 
+        err.response?.data?.message || 'No se pudo iniciar sesión.'
+      );
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const resetLogin = async () => {
     setEmail('');
@@ -125,81 +195,118 @@ const LoginScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      {/* Icono de autenticación biométrica */}
-      {isBiometricAvailable && <IconButton
-        icon="fingerprint"
-        size={24}
-        style={styles.biometricIcon}
-        onPress={handleBiometricLogin}
-        disabled={loading}
-        accessibilityLabel="Autenticación biométrica"
-      />}
+        //   Icono de autenticación biométrica
+    {isBiometricAvailable && <IconButton
+       icon="fingerprint"
+       size={24}
+       style={styles.biometricIcon}
+       onPress={handleBiometricLogin}
+       disabled={loading}
+       accessibilityLabel="Autenticación biométrica"
+     />}
 
-      {/* Icono de reinicio (existente) */}
-      {tokenRequested && (
-        <IconButton
-          icon="refresh"
-          size={24}
-          style={styles.resetIcon}
-          onPress={resetLogin}
-          disabled={loading}
-          accessibilityLabel="Reiniciar proceso de login"
-        />
-      )}
+     {/* Icono de reinicio (existente) */}
+     {tokenRequested && (
+       <IconButton
+         icon="refresh"
+         size={24}
+         style={styles.resetIcon}
+         onPress={resetLogin}
+         disabled={loading}
+         accessibilityLabel="Reiniciar proceso de login"
+       />
+     )}
 
-      <Text style={styles.title}>Autenticación por Token</Text>
+     <Text style={styles.title}>Autenticación por Token</Text>
 
-      <TextInput
-        label="Correo electrónico"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        disabled={tokenRequested || loading}
-      />
-
-      {!tokenRequested ? (
-        <>
-          <Button
-            mode="contained"
-            onPress={requestLoginToken}
-            loading={loading}
-            disabled={loading}
-            style={styles.button}
+      {activeSessionInfo ? (
+        <View style={styles.sessionWarningContainer}>
+          <Text style={styles.warningTitle}>¡Sesión activa detectada!</Text>
+          
+          <Text style={styles.warningText}>
+            Hay una sesión iniciada el {activeSessionInfo.lastLogin}.
+          </Text>          
+          <Text style={styles.securityWarning}>
+            Por seguridad, solo puedes tener una sesión activa a la vez.
+          </Text>
+          
+          <Text style={styles.securityAdvice}>
+            Si no reconoces esta actividad, cambia tu contraseña inmediatamente.
+          </Text>
+          
+          <Button 
+            mode="contained" 
+            onPress={handleForceLogin}
+            style={styles.forceLoginButton}
+            labelStyle={styles.forceLoginButtonLabel}
           >
-            Solicitar token
+            Cerrar sesión anterior e iniciar nueva
           </Button>
-
-          <Button
-            mode="outlined"
-            onPress={() => setTokenRequested(true)}
-            disabled={loading || !email.trim()}
-            style={styles.secondaryButton}
+          
+          <Button 
+            mode="outlined" 
+            onPress={() => setActiveSessionInfo(null)}
+            style={styles.cancelButton}
           >
-            Ya tengo un token
+            Cancelar
           </Button>
-        </>
+        </View>
       ) : (
         <>
+          {/* Tu formulario de login existente */}
           <TextInput
-            label="Token recibido por email"
-            value={loginToken}
-            onChangeText={setLoginToken}
+            label="Correo electrónico"
+            value={email}
+            onChangeText={setEmail}
             style={styles.input}
-            keyboardType="default"
             autoCapitalize="none"
-            disabled={loading}
+            keyboardType="email-address"
+            disabled={tokenRequested || loading}
           />
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            loading={loading}
-            disabled={loading}
-            style={styles.button}
-          >
-            Iniciar sesión
-          </Button>
+
+          {!tokenRequested ? (
+            <>
+              <Button
+                mode="contained"
+                onPress={requestLoginToken}
+                loading={loading}
+                disabled={loading}
+                style={styles.button}
+              >
+                Solicitar token
+              </Button>
+
+              <Button
+                mode="outlined"
+                onPress={() => setTokenRequested(true)}
+                disabled={loading || !email.trim()}
+                style={styles.secondaryButton}
+              >
+                Ya tengo un token
+              </Button>
+            </>
+          ) : (
+            <>
+              <TextInput
+                label="Token recibido por email"
+                value={loginToken}
+                onChangeText={setLoginToken}
+                style={styles.input}
+                keyboardType="default"
+                autoCapitalize="none"
+                disabled={loading}
+              />
+              <Button
+                mode="contained"
+                onPress={handleLogin}
+                loading={loading}
+                disabled={loading}
+                style={styles.button}
+              >
+                Iniciar sesión
+              </Button>
+            </>
+          )}
         </>
       )}
     </KeyboardAvoidingView>
@@ -239,6 +346,50 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
   },
+  sessionWarningContainer: {
+    backgroundColor: '#fff8e1',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ffd54f'
+  },
+  warningTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#e65100',
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  warningText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#333'
+  },
+  securityWarning: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#d32f2f',
+    marginTop: 15,
+    marginBottom: 5
+  },
+  securityAdvice: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#555',
+    marginBottom: 20
+  },
+  forceLoginButton: {
+    backgroundColor: '#d32f2f',
+    marginTop: 10
+  },
+  forceLoginButtonLabel: {
+    color: 'white'
+  },
+  cancelButton: {
+    marginTop: 10,
+    borderColor: '#757575'
+  }
 });
 
 export default LoginScreen;
