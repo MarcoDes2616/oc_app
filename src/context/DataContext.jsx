@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axiosInstance from "../services/axios";
 import { list } from "../utils/lists";
+import { Linking } from "react-native";
 
 const DataContext = createContext();
 
@@ -18,7 +19,7 @@ export const DataProvider = ({ children }) => {
     setLoading(false);
     throw err;
   };
-  
+
   const buildFormData = (data, convertKey) => {
     const formData = new FormData();
 
@@ -167,7 +168,7 @@ export const DataProvider = ({ children }) => {
     },
     create: async (signalData) => {
       setLoading(true);
-      if(signalData.image_reference) {
+      if (signalData.image_reference) {
         signalData = buildFormData(signalData, "image_reference");
       }
       try {
@@ -280,14 +281,45 @@ export const DataProvider = ({ children }) => {
   };
 
   const sendCustomNotification = async (notificationData) => {
-  try {
-    const response = await axiosInstance.post('/system/send-custom-notification', notificationData);
-    return response.data;
-  } catch (error) {
-    console.error('Error sending notification:', error);
-    throw error;
-  }
-};
+    try {
+      const response = await axiosInstance.post(
+        "/system/send-custom-notification",
+        notificationData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      throw error;
+    }
+  };
+  const handleOpenTelegram = async (item) => {
+    if (!item.telegram_user) return;
+
+    try {
+      const username = item.telegram_user.startsWith("@")
+        ? item.telegram_user.substring(1)
+        : item.telegram_user;
+
+      const telegramAppUrl = `tg://resolve?domain=${username}`;
+      const canOpen = await Linking.canOpenURL(telegramAppUrl);
+
+      if (canOpen) {
+        await Linking.openURL(telegramAppUrl);
+      } else {
+        await Linking.openURL(`https://t.me/${username}`);
+      }
+    } catch (error) {}
+  };
+
+  const openMT5WithParameters = async () => {
+    try {
+      const mt5Installed = await Linking.canOpenURL("metatrader5://");
+
+      if (mt5Installed) {
+        await Linking.openURL("metatrader5://");
+      }
+    } catch (error) {}
+  };
 
   return (
     <DataContext.Provider
@@ -300,6 +332,8 @@ export const DataProvider = ({ children }) => {
         lists,
         fetchAdminData,
         sendCustomNotification,
+        handleOpenTelegram,
+        openMT5WithParameters,
         actions: {
           users: userActions,
           projects: projectActions,

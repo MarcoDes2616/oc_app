@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,19 @@ import {
   TextInput,
   ScrollView,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { useData } from "../../../context/DataContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const ListsView = () => {
-  const { lists } = useData();
+  const { lists, actions } = useData();
   const [activeTab, setActiveTab] = useState("instruments");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingInstrument, setEditingInstrument] = useState(null);
   const [instrumentName, setInstrumentName] = useState("");
-  const [showActions, setShowActions] = useState(null); // ID del item seleccionado
+  const [showActions, setShowActions] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // CRUD Operations
   const handleAddInstrument = () => {
@@ -57,31 +59,35 @@ const ListsView = () => {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.itemTitle}>
-          {item.instrument_name || item.market_name || 
-           item.operation_type_name || item.signal_status_name}
+          {item.instrument_name ||
+            item.market_name ||
+            item.operation_type_name ||
+            item.signal_status_name}
         </Text>
-        
+
         {activeTab === "instruments" && (
           <View style={styles.actionsWrapper}>
             <Pressable onPress={() => toggleActions(item.id)}>
               <MaterialIcons name="more-vert" size={24} color="#757575" />
             </Pressable>
-            
+
             {showActions === item.id && (
               <View style={styles.actionsMenu}>
-                <Pressable 
+                <Pressable
                   style={styles.actionButton}
                   onPress={() => handleEditInstrument(item)}
                 >
                   <MaterialIcons name="edit" size={18} color="#6200ee" />
                   <Text style={styles.actionText}>Editar</Text>
                 </Pressable>
-                <Pressable 
+                <Pressable
                   style={styles.actionButton}
                   onPress={() => handleDeleteInstrument(item.id)}
                 >
                   <MaterialIcons name="delete" size={18} color="#ff0000" />
-                  <Text style={[styles.actionText, { color: "#ff0000" }]}>Eliminar</Text>
+                  <Text style={[styles.actionText, { color: "#ff0000" }]}>
+                    Eliminar
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -91,13 +97,24 @@ const ListsView = () => {
     );
   };
 
+  const fetchInstruments = async () => {
+    setRefreshing(true);
+    try {
+      await actions.instruments.getAll();
+    } catch (error) {
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // if (loading && !refreshing) return <ActivityIndicator size="large" />;
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Listas</Text>
-      
+
       {/* Pestañas scrollables */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabsContainer}
       >
@@ -119,8 +136,8 @@ const ListsView = () => {
 
       {/* Botón de agregar solo para instrumentos */}
       {activeTab === "instruments" && (
-        <TouchableOpacity 
-          style={styles.addButton} 
+        <TouchableOpacity
+          style={styles.addButton}
           onPress={handleAddInstrument}
         >
           <MaterialIcons name="add" size={24} color="white" />
@@ -132,21 +149,25 @@ const ListsView = () => {
       <FlatList
         data={lists[activeTab]}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={fetchInstruments}
+          />
+        }
+        keyExtractor={(item, index) =>
+          item.id ? item.id.toString() : index.toString()
+        }
       />
 
       {/* Modal mejorado */}
-      <Modal 
-        visible={isModalVisible} 
-        animationType="fade"
-        transparent={true}
-      >
+      <Modal visible={isModalVisible} animationType="fade" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>
               {editingInstrument ? "Editar Instrumento" : "Nuevo Instrumento"}
             </Text>
-            
+
             <TextInput
               style={styles.input}
               placeholder="Nombre del instrumento"
@@ -154,16 +175,16 @@ const ListsView = () => {
               onChangeText={setInstrumentName}
               autoFocus
             />
-            
+
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setIsModalVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.saveButton}
                 onPress={handleSaveInstrument}
               >
@@ -329,4 +350,3 @@ const styles = StyleSheet.create({
 });
 
 export default ListsView;
-

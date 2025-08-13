@@ -6,11 +6,10 @@ import {
   StyleSheet,
   Image,
   Modal,
-  Linking,
-  Alert,
   Clipboard
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useData } from "../context/DataContext";
 
 const SignalItem = ({
   item,
@@ -24,18 +23,7 @@ const SignalItem = ({
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   
-  const openMT5WithParameters = async () => {
-   try {
-    const mt5Installed = await Linking.canOpenURL('metatrader5://');
-    
-    if (mt5Installed) {
-      await Linking.openURL('metatrader5://');
-    }
-  } catch (error) {
-    console.error("Error al abrir MT5:", error);
-    Alert.alert('Error', 'No se pudo abrir MetaTrader 5');
-  }
-  };
+  const { openMT5WithParameters } = useData();
 
   const status = lists.signalStatus?.find((s) => s.id === item.signal_status_id);
   const instrument = lists.instruments?.find((i) => i.id === item.instrument_id);

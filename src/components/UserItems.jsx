@@ -1,13 +1,12 @@
-import React from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
-  Pressable,
-  Linking 
+  Pressable, 
 } from 'react-native';
 import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome } from '@expo/vector-icons';
+import { useData } from '../context/DataContext';
 
 const UserItem = ({ 
   item, 
@@ -16,34 +15,10 @@ const UserItem = ({
   handleEditUser, 
   handleDeleteUser 
 }) => {
-  const handleOpenTelegram = async () => {
-    if (!item.telegram_user) return;
+  const { handleOpenTelegram } = useData();
 
-    try {
-      const username = item.telegram_user.startsWith('@') 
-        ? item.telegram_user.substring(1) 
-        : item.telegram_user;
-      
-      // Intentamos abrir directamente la app de Telegram
-      const telegramAppUrl = `tg://resolve?domain=${username}`;
-      const canOpen = await Linking.canOpenURL(telegramAppUrl);
-      
-      if (canOpen) {
-        await Linking.openURL(telegramAppUrl);
-      } else {
-        // Si no está instalada, abrimos en navegador
-        await Linking.openURL(`https://t.me/${username}`);
-      }
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'No se pudo abrir Telegram. Asegúrate de tener la aplicación instalada.',
-        [{ text: 'OK' }]
-      );
-      console.error('Error al abrir Telegram:', error);
-    }
-  };
 
+  
   return (
     <View style={styles.itemContainer}>
       <View style={styles.itemContent}>
@@ -59,7 +34,7 @@ const UserItem = ({
           {item.telegram_user && (
             <Pressable 
               style={styles.telegramContainer}
-              onPress={handleOpenTelegram}
+              onPress={() => handleOpenTelegram(item)}
             >
               <FontAwesome name="telegram" size={16} color="#0088cc" />
               <Text style={styles.telegramText}>
