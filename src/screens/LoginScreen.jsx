@@ -194,7 +194,7 @@ const LoginScreen = () => {
     } catch (err) {
       if (
         err.response?.status === 403 &&
-        err.response?.data?.code === "SESSION_INACTIVE"
+        err.response?.data?.code === "SESSION_ACTIVE"
       ) {
         setActiveSessionInfo({
           lastLogin: err.response.data.session.last_login,
