@@ -76,6 +76,7 @@ const ProfileScreen = () => {
             style={styles.actionButton}
             onPress={() => navigation.navigate("EditProfile")}
             icon="account-edit"
+            disabled={true}
           >
             Editar Perfil
           </Button>
@@ -85,6 +86,7 @@ const ProfileScreen = () => {
             style={styles.actionButton}
             onPress={() => navigation.navigate("ChangePassword")}
             icon="lock-reset"
+            disabled={true}
           >
             Cambiar Contraseña
           </Button>
