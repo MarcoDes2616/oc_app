@@ -8,31 +8,14 @@ import authService from './services/authServices';
 
 const AppContent = () => {
   const { isAppLoading, user } = useContext(AppContext);
-  const [hasToken, setHasToken] = useState(false);
-  const [isCheckingToken, setIsCheckingToken] = useState(true);
-
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await authService.getCurrentUser();
-        setHasToken(!!token);
-      } catch (error) {
-        setHasToken(false);
-      } finally {
-        setIsCheckingToken(false);
-      }
-    };
-
-    checkToken();
-  }, [user]);
   
-  if (isAppLoading || isCheckingToken) {
+  if (isAppLoading) {
     return <SplashScreen />;
   }
 
   return (
     <NavigationContainer>
-      {hasToken ? <MainNavigator /> : <LoginScreen />}
+      {user ? <MainNavigator /> : <LoginScreen />}
     </NavigationContainer>
   );
 };

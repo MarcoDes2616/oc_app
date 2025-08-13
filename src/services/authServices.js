@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { Alert } from "react-native";
 
 const getCurrentUser = async () => {
   try {
@@ -11,9 +12,10 @@ const getCurrentUser = async () => {
 };
 
 const actionLogout = async () => {
-  await SecureStore.deleteItemAsync("user_token");
-  if (window.location) {
-    window.location.reload();
+  try {
+    await SecureStore.deleteItemAsync("user_token");
+  } catch (error) {
+    return null;
   }
 };
 

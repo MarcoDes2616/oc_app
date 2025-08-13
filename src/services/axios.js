@@ -17,20 +17,6 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   }
-); 
-
-axiosInstance.interceptors.response.use(
-  response => response,
-  async error => {
-    if (error.response && (error.response.status === 401)) {
-      try {
-        await authService.actionLogout();
-      } catch (logoutError) {
-        console.error('Error during logout:', logoutError);
-      }
-    } 
-    return Promise.reject(error);
-  }
 );
 
 export default axiosInstance;

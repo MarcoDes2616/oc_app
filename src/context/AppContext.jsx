@@ -4,6 +4,7 @@ import axiosInstance from "../services/axios.js";
 import { createContext, useEffect, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { registerForPushNotifications } from "../utils/notifications.js";
+import authService from "../services/authServices.js";
 
 const AppContext = createContext();
 
@@ -111,9 +112,7 @@ export const AppProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (Platform.OS !== "web") {
-        await SecureStore.deleteItemAsync("user_token");
-      }
+      await authService.actionLogout()
       setUser(null);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
