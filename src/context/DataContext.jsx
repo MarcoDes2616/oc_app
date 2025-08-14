@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axiosInstance from "../services/axios";
 import { list } from "../utils/lists";
- import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 
 const DataContext = createContext();
 
@@ -293,26 +293,26 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-const handleOpenTelegram = async (item) => {
-  if (!item.telegram_user) return;
+  const handleOpenTelegram = async (item) => {
+    if (!item.telegram_user) return;
 
-  try {
-    const username = item.telegram_user.replace(/^@/, "");
-    const telegramAppUrl = `tg://resolve?domain=${username}`;
-    
-    // Verifica si Telegram está instalado
-    const canOpen = await Linking.canOpenURL(telegramAppUrl);
+    try {
+      const username = item.telegram_user.replace(/^@/, "");
+      const telegramAppUrl = `tg://resolve?domain=${username}`;
 
-    if (canOpen) {
-      await Linking.openURL(telegramAppUrl);
-    } else {
-      // Fallback a la versión web
-      await Linking.openURL(`https://t.me/${username}`);
+      // Verifica si Telegram está instalado
+      const canOpen = await Linking.canOpenURL(telegramAppUrl);
+
+      if (canOpen) {
+        await Linking.openURL(telegramAppUrl);
+      } else {
+        // Fallback a la versión web
+        await Linking.openURL(`https://t.me/${username}`);
+      }
+    } catch (error) {
+      console.error("Error opening Telegram:", error);
     }
-  } catch (error) {
-    console.error("Error opening Telegram:", error);
-  }
-};
+  };
 
   return (
     <DataContext.Provider

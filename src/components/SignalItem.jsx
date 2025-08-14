@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Image,
   Modal,
-  Clipboard
+  Clipboard,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useData } from "../context/DataContext";
@@ -22,12 +22,18 @@ const SignalItem = ({
 }) => {
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
-  
+
   const { openMT5WithParameters } = useData();
 
-  const status = lists.signalStatus?.find((s) => s.id === item.signal_status_id);
-  const instrument = lists.instruments?.find((i) => i.id === item.instrument_id);
-  const operation = lists.operationsTypes?.find((o) => o.id === item.operation_type_id);
+  const status = lists.signalStatus?.find(
+    (s) => s.id === item.signal_status_id
+  );
+  const instrument = lists.instruments?.find(
+    (i) => i.id === item.instrument_id
+  );
+  const operation = lists.operationsTypes?.find(
+    (o) => o.id === item.operation_type_id
+  );
 
   const copyToClipboard = (text, fieldName) => {
     if (!text) return;
@@ -52,19 +58,20 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text style={[styles.statusText, { color: status?.color || "#757575" }]}>
+        <Text
+          style={[styles.statusText, { color: status?.color || "#757575" }]}
+        >
           {status?.signal_status_name}
         </Text>
       </View>
 
       {/* Botón MT5 */}
-      <Pressable 
-        style={styles.mt5Button}
-        onPress={openMT5WithParameters}
-      >
-        <MaterialIcons name="launch" size={20} color="#43A047" />
-        <Text style={styles.mt5ButtonText}>Configurar en MT5</Text>
-      </Pressable>
+      {hideActions && (
+        <Pressable style={styles.mt5Button} onPress={openMT5WithParameters}>
+          <MaterialIcons name="launch" size={20} color="#43A047" />
+          <Text style={styles.mt5ButtonText}>Configurar en MT5</Text>
+        </Pressable>
+      )}
 
       {/* Valores copiables */}
       <View style={styles.valuesContainer}>
@@ -112,7 +119,9 @@ const SignalItem = ({
         >
           <Text style={styles.valueLabel}>Target:</Text>
           <View style={styles.valueContent}>
-            <Text style={styles.targetText}>{item.expected_target || "N/A"}</Text>
+            <Text style={styles.targetText}>
+              {item.expected_target || "N/A"}
+            </Text>
             <MaterialIcons
               name="content-copy"
               size={16}
@@ -228,18 +237,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   mt5Button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E8F5E9',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E8F5E9",
     padding: 10,
     borderRadius: 8,
     marginBottom: 12,
   },
   mt5ButtonText: {
-    color: '#43A047',
+    color: "#43A047",
     marginLeft: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   valuesContainer: {
     flexDirection: "row",
