@@ -33,7 +33,7 @@ const ProfileMenu = () => {
    <View style={styles.container}>
       <View style={styles.menuCard}>
         {menuItems.map((item) => {
-          // if (!item.roles.includes(user?.roleId)) return null;
+          if (!item.roles.includes(user?.role_id)) return null;
           
           return (
             <TouchableOpacity 

@@ -268,7 +268,7 @@ export const DataProvider = ({ children }) => {
     setLoading(true);
     try {
       await Promise.all([
-        userActions.getAll(),
+        // userActions.getAll(),
         projectActions.getAll(),
         instrumentActions.getAll(),
       ]);
@@ -306,13 +306,24 @@ export const DataProvider = ({ children }) => {
       if (canOpen) {
         await Linking.openURL(telegramAppUrl);
       } else {
-        // Fallback a la versión web
         await Linking.openURL(`https://t.me/${username}`);
       }
     } catch (error) {
-      console.error("Error opening Telegram:", error);
+      return null;
     }
   };
+
+  const openMT5WithParameters = async () => {
+  try {
+    const mt5Installed = await Linking.canOpenURL("metatrader5://");
+
+    if (mt5Installed) {
+      await Linking.openURL("metatrader5://");
+    }
+  } catch (error) {
+    return null;
+  }
+};
 
   return (
     <DataContext.Provider
