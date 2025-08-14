@@ -21,7 +21,28 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.cmarko.operationaclub"
+      "package": "com.cmarko.operationaclub",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tg",
+              "host": "resolve"
+            },
+            {
+              "scheme": "metatrader5"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
+      "permissions": [
+        "android.permission.QUERY_ALL_PACKAGES"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
