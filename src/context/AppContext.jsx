@@ -102,8 +102,7 @@ export const AppProvider = ({ children }) => {
           const { data } = await axiosInstance.get("system/me");
           setUser(data.user);
         } catch (error) {
-          logout();
-          await SecureStore.deleteItemAsync("biometric_credentials");
+          await authService.clearAllSecureStorage()
         }
       }
     }

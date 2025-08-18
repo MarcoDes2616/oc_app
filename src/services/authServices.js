@@ -21,13 +21,13 @@ const actionLogout = async () => {
 
 const clearAllSecureStorage = async () => {
   await SecureStore.deleteItemAsync("user_token");
-  await SecureStore.deleteItemAsync("user_token");
+  await SecureStore.deleteItemAsync("biometric_credentials");
 };
 
 const authService = {
   getCurrentUser,
   actionLogout,
-  clearAllSecureStorage // Opcional
+  clearAllSecureStorage
 };
 
 export default authService;
