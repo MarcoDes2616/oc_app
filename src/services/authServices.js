@@ -21,6 +21,7 @@ const actionLogout = async () => {
 
 const clearAllSecureStorage = async () => {
   await SecureStore.deleteItemAsync("user_token");
+  await SecureStore.deleteItemAsync("user_token");
 };
 
 const authService = {

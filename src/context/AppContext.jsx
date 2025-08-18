@@ -96,7 +96,7 @@ export const AppProvider = ({ children }) => {
 
   const checkStoredCredentials = async () => {
     if (Platform.OS !== "web") {
-      const token = await SecureStore.getItemAsync("user_token");
+      const token = await authService.getCurrentUser();
       if (token) {
         try {
           const { data } = await axiosInstance.get("system/me");
