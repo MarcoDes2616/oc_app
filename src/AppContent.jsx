@@ -6,12 +6,7 @@ import MainNavigator from './navigation/MainNavigator';
 import SplashScreen from './screens/SplashScreen';
 
 const AppContent = () => {
-  const { isAppLoading, user, checkStoredCredentials } = useContext(AppContext);
-  
-  useEffect(() => {
-    checkStoredCredentials()
-  }, [])
-
+  const { isAppLoading, user } = useContext(AppContext);
 
   if (isAppLoading) {
     return <SplashScreen />;

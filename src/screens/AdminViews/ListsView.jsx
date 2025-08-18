@@ -11,7 +11,7 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import { useData } from "../../../context/DataContext";
+import { useData } from "../../context/DataContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const ListsView = () => {

@@ -11,17 +11,15 @@ export default function App() {
   useEffect(() => {
     const subscription = Notifications.addNotificationReceivedListener(notification => {
       const { title, body, data } = notification.request.content;
-      
-      // Guardar la notificación
+
       addNotification({
-        id: Date.now().toString(), // ID único
+        id: Date.now().toString(),
         title,
         body,
         data,
         date: new Date().toISOString(),
       });
 
-      // Redirigir si hay data.screen (opcional)
       if (data?.screen) {
         navigation.navigate(data.screen, data);
       }

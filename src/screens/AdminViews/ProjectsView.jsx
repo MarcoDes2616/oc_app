@@ -11,7 +11,7 @@ import {
   Pressable,
   ScrollView
 } from 'react-native';
-import { useData } from "../../../context/DataContext";
+import { useData } from "../../context/DataContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 

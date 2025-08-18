@@ -15,11 +15,11 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useData } from "../../../context/DataContext";
-import SignalItem from "../../../components/SignalItem";
-import ProjectSelectionView from "../../../components/ProjectSelectionView";
-import SignalsListView from "../../../components/SignalsListView";
-import CreateSignalModal from "../../../components/modals/CreateSignalModal";
+import { useData } from "../../context/DataContext";
+import SignalItem from "../../components/SignalItem";
+import ProjectSelectionView from "../../components/ProjectSelectionView";
+import SignalsListView from "../../components/SignalsListView";
+import CreateSignalModal from "../../components/modals/CreateSignalModal";
 
 const SignalsView = () => {
   const { lists, actions, loading, projects } = useData();

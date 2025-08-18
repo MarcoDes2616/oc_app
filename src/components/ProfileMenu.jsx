@@ -1,6 +1,4 @@
-import { useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 
@@ -8,33 +6,22 @@ const menuItems = [
   { 
     screen: 'ProfileMain', 
     icon: 'account',
-    roles: [1, 2],
     color: '#10b981'
   },
   { 
     screen: 'Settings', 
     icon: 'cog',
-    roles: [1, 2],
     color: '#6366f1'
   },
-  { 
-    screen: 'Admin', 
-    icon: 'shield-account',
-    roles: [1],
-    color: '#ef4444'
-  }
 ];
 
 const ProfileMenu = () => {
   const navigation = useNavigation();
-  const { user } = useContext(AppContext); 
 
   return (
    <View style={styles.container}>
       <View style={styles.menuCard}>
         {menuItems.map((item) => {
-          if (!item.roles.includes(user?.role_id)) return null;
-          
           return (
             <TouchableOpacity 
               key={item.screen}

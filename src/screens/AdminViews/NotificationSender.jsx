@@ -8,7 +8,7 @@ import {
   Alert
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useData } from '../../../context/DataContext';
+import { useData } from '../../context/DataContext';
 
 const NotificationSender = () => {
   const { sendCustomNotification } = useData();

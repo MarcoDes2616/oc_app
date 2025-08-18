@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
-import { useData } from "../../../context/DataContext";
+import { useData } from "../../context/DataContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import CreateUserModal from "../../../components/modals/CreateUserModal";
-import UserItem from "../../../components/UserItems";
+import CreateUserModal from "../../components/modals/CreateUserModal";
+import UserItem from "../../components/UserItems";
 
 const UsersView = () => {
   const { users, loading, actions } = useData();

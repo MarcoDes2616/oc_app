@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import ProjectsView from './AdminViews/ProjectsView';
 import SignalsView from './AdminViews/SignalsView';
 import UsersView from './AdminViews/UsersView';
-import { useData } from '../../context/DataContext';
-import ViewSelectorButton from '../../components/ViewSelectorButton';
+import { useData } from '../context/DataContext';
+import ViewSelectorButton from '../components/ViewSelectorButton';
 import ListsView from './AdminViews/ListsView';
 import NotificationSender from './AdminViews/NotificationSender';
 
