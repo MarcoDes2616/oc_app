@@ -2,18 +2,14 @@ import { useState, useEffect } from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
-  TouchableOpacity,
   Modal,
   TextInput,
   Pressable,
   ScrollView,
-  ActivityIndicator,
   Image,
-  RefreshControl,
 } from "react-native";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const CreateSignalModal = ({
   isModalVisible,
@@ -24,7 +20,8 @@ const CreateSignalModal = ({
   setFormData,
   handleSaveSignal,
   lists,
-  editingSignal
+  editingSignal,
+  market_id,
 }) => {
   return (
     <Modal
@@ -43,7 +40,9 @@ const CreateSignalModal = ({
             {/* Instrumento */}
             <Text style={styles.inputLabel}>Instrumento *</Text>
             <View style={styles.pickerContainer}>
-              {lists.instruments?.map((instrument) => (
+              {lists.instruments?.map((instrument) => {
+                if (instrument.market_id !== market_id) return null;
+                return (
                 <Pressable
                   key={instrument.id}
                   style={[
@@ -57,7 +56,8 @@ const CreateSignalModal = ({
                 >
                   <Text>{instrument.instrument_name}</Text>
                 </Pressable>
-              ))}
+                )
+              })}
             </View>
 
             {/* Tipo de operación */}

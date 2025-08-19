@@ -220,6 +220,7 @@ const SignalsView = () => {
         handleSaveSignal={handleSaveSignal}
         lists={lists}
         editingSignal={editingSignal}
+        market_id={selectedProject.market_id}
       />
     </View>
   );
