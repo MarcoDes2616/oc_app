@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -32,6 +32,10 @@ const UsersView = () => {
   };
 
   const [formData, setFormData] = useState(initFormData);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
     setRefreshing(true);

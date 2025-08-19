@@ -230,7 +230,6 @@ export const DataProvider = ({ children }) => {
           "/instruments",
           instrumentData
         );
-        setLists((prev) => ({ ...prev, instruments: data }));
         return data;
       } catch (err) {
         return handleError(err);
@@ -245,7 +244,6 @@ export const DataProvider = ({ children }) => {
           `/instruments/${id}`,
           instrumentData
         );
-        setLists((prev) => ({ ...prev, instruments: data }));
         return data;
       } catch (err) {
         return handleError(err);
@@ -256,8 +254,7 @@ export const DataProvider = ({ children }) => {
     delete: async (id) => {
       setLoading(true);
       try {
-        const {data} = await axiosInstance.delete(`/instruments/${id}`);
-        setLists((prev) => ({ ...prev, instruments: data }));
+        await axiosInstance.delete(`/instruments/${id}`);
         return true;
       } catch (err) {
         return handleError(err);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { act, useState } from "react";
 import {
   View,
   Text,
@@ -35,18 +35,32 @@ const ListsView = () => {
     setIsModalVisible(true);
   };
 
-  const handleSaveInstrument = () => {
-    if (editingInstrument) {
-      actions.instruments.update(editingInstrument.id, formData);
-    } else {
-      actions.instruments.create(formData);
+  const handleSaveInstrument = async() => {
+    try {
+      if (editingInstrument) {
+        actions.instruments.update(editingInstrument.id, formData);
+      } else {
+        await actions.instruments.create(formData);
+      }
+    } catch (error) {
+      return null;
+    } finally {
+      await actions.instruments.getAll();
+      setIsModalVisible(false);
+      setFormData(initFormData);
+      setEditingInstrument(null);
     }
-    setIsModalVisible(false);
   };
 
   const handleDeleteInstrument = (id) => {
-    actions.instruments.delete(id);
-    setShowActions(null);
+    try {
+      actions.instruments.delete(id);
+    } catch (error) {
+      return null;
+    } finally {
+      actions.instruments.getAll();
+      setShowActions(null);
+    }
   };
 
   const toggleActions = (id) => {
@@ -171,7 +185,9 @@ const ListsView = () => {
               style={styles.input}
               placeholder="Nombre del instrumento"
               value={formData.instrument_name}
-              onChangeText={(text) => setFormData({...formData, instrument_name: text})}
+              onChangeText={(text) =>
+                setFormData({ ...formData, instrument_name: text })
+              }
               autoFocus
             />
 
@@ -234,9 +250,9 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 8,
-    color: '#424242',
+    color: "#424242",
   },
   input: {
     borderWidth: 1,
@@ -247,20 +263,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   pickerContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 16,
   },
   marketOption: {
     padding: 10,
     margin: 4,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
   },
   selectedMarket: {
-    borderColor: '#6200ee',
-    backgroundColor: '#f3e5ff',
+    borderColor: "#6200ee",
+    backgroundColor: "#f3e5ff",
   },
   tab: {
     paddingHorizontal: 16,
