@@ -38,7 +38,7 @@ const CreateSignalModal = ({
             </Text>
 
             {/* Instrumento */}
-            <Text style={styles.inputLabel}>Instrumento *</Text>
+            <Text style={styles.inputLabel}>Instrumento / Par *</Text>
             <View style={styles.pickerContainer}>
               {lists.instruments?.map((instrument) => {
                 if (instrument.market_id !== market_id) return null;
