@@ -14,45 +14,48 @@ import {
 import { useData } from "../../context/DataContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
+const initFormData = {
+  instrument_name: "",
+  market_id: null,
+};
+
 const ListsView = () => {
   const { lists, actions } = useData();
   const [activeTab, setActiveTab] = useState("instruments");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingInstrument, setEditingInstrument] = useState(null);
-  const [instrumentName, setInstrumentName] = useState("");
+  const [formData, setFormData] = useState(initFormData);
   const [showActions, setShowActions] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   // CRUD Operations
   const handleAddInstrument = () => {
     setEditingInstrument(null);
-    setInstrumentName("");
+    setFormData(initFormData);
     setIsModalVisible(true);
-  };
-
-  const handleEditInstrument = (item) => {
-    setEditingInstrument(item);
-    setInstrumentName(item.instrument_name);
-    setIsModalVisible(true);
-    setShowActions(null); // Cerrar menú de acciones
   };
 
   const handleSaveInstrument = () => {
-    // Implementar lógica de guardado
-    console.log("Guardando:", {
-      id: editingInstrument?.id || Date.now(),
-      instrument_name: instrumentName,
-    });
+    if (editingInstrument) {
+      actions.instruments.update(editingInstrument.id, formData);
+    } else {
+      actions.instruments.create(formData);
+    }
     setIsModalVisible(false);
   };
 
   const handleDeleteInstrument = (id) => {
-    console.log("Eliminando instrumento con id:", id);
-    setShowActions(null); // Cerrar menú de acciones
+    actions.instruments.delete(id);
+    setShowActions(null);
   };
 
   const toggleActions = (id) => {
     setShowActions(showActions === id ? null : id);
+  };
+
+  const renderMarket = (item) => {
+    let market = lists.markets.find((market) => market.id === item.market_id);
+    return <Text>{market && market.market_name}</Text>;
   };
 
   const renderItem = ({ item }) => {
@@ -66,32 +69,28 @@ const ListsView = () => {
         </Text>
 
         {activeTab === "instruments" && (
-          <View style={styles.actionsWrapper}>
-            <Pressable onPress={() => toggleActions(item.id)}>
-              <MaterialIcons name="more-vert" size={24} color="#757575" />
-            </Pressable>
+          <>
+            <View>{renderMarket(item)}</View>
+            <View style={styles.actionsWrapper}>
+              <Pressable onPress={() => toggleActions(item.id)}>
+                <MaterialIcons name="more-vert" size={24} color="#757575" />
+              </Pressable>
 
-            {showActions === item.id && (
-              <View style={styles.actionsMenu}>
-                <Pressable
-                  style={styles.actionButton}
-                  onPress={() => handleEditInstrument(item)}
-                >
-                  <MaterialIcons name="edit" size={18} color="#6200ee" />
-                  <Text style={styles.actionText}>Editar</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.actionButton}
-                  onPress={() => handleDeleteInstrument(item.id)}
-                >
-                  <MaterialIcons name="delete" size={18} color="#ff0000" />
-                  <Text style={[styles.actionText, { color: "#ff0000" }]}>
-                    Eliminar
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
+              {showActions === item.id && (
+                <View style={styles.actionsMenu}>
+                  <Pressable
+                    style={styles.actionButton}
+                    onPress={() => handleDeleteInstrument(item.id)}
+                  >
+                    <MaterialIcons name="delete" size={18} color="#ff0000" />
+                    <Text style={[styles.actionText, { color: "#ff0000" }]}>
+                      Eliminar
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+          </>
         )}
       </View>
     );
@@ -171,10 +170,28 @@ const ListsView = () => {
             <TextInput
               style={styles.input}
               placeholder="Nombre del instrumento"
-              value={instrumentName}
-              onChangeText={setInstrumentName}
+              value={formData.instrument_name}
+              onChangeText={(text) => setFormData({...formData, instrument_name: text})}
               autoFocus
             />
+
+            <Text style={styles.inputLabel}>Mercado *</Text>
+            <View style={styles.pickerContainer}>
+              {lists.markets.map((market) => (
+                <Pressable
+                  key={market.id}
+                  style={[
+                    styles.marketOption,
+                    formData.market_id === market.id && styles.selectedMarket,
+                  ]}
+                  onPress={() =>
+                    setFormData({ ...formData, market_id: market.id })
+                  }
+                >
+                  <Text>{market.market_name}</Text>
+                </Pressable>
+              ))}
+            </View>
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -187,6 +204,7 @@ const ListsView = () => {
               <TouchableOpacity
                 style={styles.saveButton}
                 onPress={handleSaveInstrument}
+                disabled={!formData.instrument_name || !formData.market_id}
               >
                 <Text style={styles.saveButtonText}>Guardar</Text>
               </TouchableOpacity>
@@ -213,6 +231,36 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     marginBottom: 16,
     height: 50,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#424242',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  marketOption: {
+    padding: 10,
+    margin: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+  },
+  selectedMarket: {
+    borderColor: '#6200ee',
+    backgroundColor: '#f3e5ff',
   },
   tab: {
     paddingHorizontal: 16,
@@ -260,8 +308,8 @@ const styles = StyleSheet.create({
   },
   actionsMenu: {
     position: "absolute",
-    right: 0,
-    top: 30,
+    right: 20,
+    top: -10,
     backgroundColor: "white",
     borderRadius: 8,
     padding: 8,
