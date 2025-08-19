@@ -1,4 +1,4 @@
-import { act, useState } from "react";
+import { act, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,10 @@ const ListsView = () => {
     setFormData(initFormData);
     setIsModalVisible(true);
   };
+
+  useEffect(() => {
+    actions.instruments.getAll()
+  }, [])
 
   const handleSaveInstrument = async() => {
     try {
