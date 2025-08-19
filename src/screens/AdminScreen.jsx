@@ -43,11 +43,6 @@ const viewOptions = [
 
 const AdminScreen = () => {
   const [activeView, setActiveView] = useState('projects');
-  const { fetchAdminData } = useData();
-
-  useEffect(() => {
-      fetchAdminData();
-    }, []);
 
   const ActiveComponent = viewOptions.find(v => v.id === activeView)?.component;
 

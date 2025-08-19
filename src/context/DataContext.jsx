@@ -92,13 +92,22 @@ export const DataProvider = ({ children }) => {
 
   // CRUD para Proyectos (misma estructura)
   const projectActions = {
-    getAll: async () => {
+    getAll: async (status) => {
       setLoading(true);
+      let url;
+      if (status) {
+        url = `/projects?status=${status}`
+      } else {
+        url = "/projects"
+      }
+      
       try {
-        const { data } = await axiosInstance.get("/projects");
+        const { data } = await axiosInstance.get(url);
         setProjects(data);
         return data;
       } catch (err) {
+        console.log("hubo un erro");
+        
         return handleError(err);
       } finally {
         setLoading(false);
@@ -264,22 +273,6 @@ export const DataProvider = ({ children }) => {
     },
   };
 
-  const fetchAdminData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        // userActions.getAll(),
-        projectActions.getAll(),
-        instrumentActions.getAll(),
-      ]);
-    } catch (err) {
-      console.error("Error fetching initial data:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const sendCustomNotification = async (notificationData) => {
     try {
       const response = await axiosInstance.post(
@@ -334,7 +327,6 @@ export const DataProvider = ({ children }) => {
         loading,
         error,
         lists,
-        fetchAdminData,
         sendCustomNotification,
         handleOpenTelegram,
         openMT5WithParameters,

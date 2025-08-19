@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
-import ProjectSelectionView from '../components/ProjectSelectionView';
-import { useData } from '../context/DataContext';
-import SignalsListView from '../components/SignalsListView';
+import { useState, useEffect } from "react";
+import { ActivityIndicator } from "react-native";
+import { useData } from "../context/DataContext";
+import SignalsListView from "../components/SignalsListView";
 
 const SenalesScreen = () => {
-  const { lists, actions, loading, projects, fetchAdminData, signals } = useData();
-  
+  const { lists, actions, loading, projects, signals } = useData();
+
   // Estados principales
   const [selectedProject, setSelectedProject] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [filterStatus, setFilterStatus] = useState(null);
 
   useEffect(() => {
-    fetchAdminData();
-  }, [])
+    initialFetch();
+  }, []);
 
   useEffect(() => {
     if (selectedProject) {
@@ -22,14 +21,28 @@ const SenalesScreen = () => {
     }
   }, [selectedProject, filterStatus]);
 
+  const initialFetch = async () => {
+    setRefreshing(true);
+    try {
+      const result = await actions.projects.getAll(true);
+      if (result.length > 0) {
+        setSelectedProject(result[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const fetchSignals = async () => {
     setRefreshing(true);
     try {
       const params = {
         project_id: selectedProject.id,
-        ...(filterStatus && { signal_status_id: filterStatus })
+        ...(filterStatus && { signal_status_id: filterStatus }),
       };
-      const response = await actions.signals.getAll(params);
+      await actions.signals.getAll(params);
     } catch (error) {
       console.error("Error fetching signals:", error);
     } finally {
@@ -37,33 +50,23 @@ const SenalesScreen = () => {
     }
   };
 
-  const handleBack = () => {
-    setSelectedProject(null);
-  };
-
-  if (loading && !refreshing) return <ActivityIndicator size="large" />;
+  if ((loading && !refreshing) || !selectedProject) return <ActivityIndicator size="large" />;
 
   return (
     <>
-      {!selectedProject ? (
-        <ProjectSelectionView 
-          projects={projects}
-          lists={lists}
-          onSelectProject={setSelectedProject}
+    {
+      selectedProject &&
+      <SignalsListView
+        selectedProject={selectedProject}
+        signals={signals}
+        lists={lists}
+        refreshing={refreshing}
+        onRefresh={fetchSignals}
+        hideActions={true}
+        setFilterStatus={setFilterStatus}
+        filterStatus={filterStatus}
         />
-      ) : (
-        <SignalsListView
-          selectedProject={selectedProject}
-          signals={signals}
-          lists={lists}
-          refreshing={refreshing}
-          onRefresh={fetchSignals}
-          onBack={handleBack}
-          hideActions={true}
-          setFilterStatus={setFilterStatus}
-          filterStatus={filterStatus}
-        />
-      )}
+    }
     </>
   );
 };

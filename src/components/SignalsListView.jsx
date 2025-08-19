@@ -29,9 +29,9 @@ const SignalsListView = ({
   return (
     <View style={styles.container}>
       <View style={styles.projectHeader}>
-        <Pressable style={styles.backButton} onPress={onBack}>
+        {onBack && <Pressable style={styles.backButton} onPress={onBack}>
           <MaterialIcons name="arrow-back" size={24} color="#6200ee" />
-        </Pressable>
+        </Pressable>}
         <View style={styles.projectInfo}>
           <Text style={styles.projectTitle}>
             {selectedProject.project_name}

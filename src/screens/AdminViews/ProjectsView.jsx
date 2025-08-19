@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { useData } from "../../context/DataContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -19,6 +20,7 @@ const ProjectsView = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [showActions, setShowActions] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const initFormData = {
     project_name: "",
     market_id: "",
@@ -26,6 +28,21 @@ const ProjectsView = () => {
     end_date: null,
   };
   const [formData, setFormData] = useState(initFormData);
+  
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+  
+  const fetchProjects = async () => {
+    setRefreshing(true);
+    try {
+      await actions.projects.getAll();
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const toggleStatus = async (project) => {
     if (project.status) {
@@ -207,6 +224,9 @@ const ProjectsView = () => {
             )}
           </View>
         )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchProjects} />
+        }
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No hay proyectos disponibles</Text>
