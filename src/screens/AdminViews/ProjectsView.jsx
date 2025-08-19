@@ -1,40 +1,66 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  ActivityIndicator, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Modal, 
-  TextInput,
+import { useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
   Pressable,
-  ScrollView
-} from 'react-native';
+  Alert,
+} from "react-native";
 import { useData } from "../../context/DataContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import CreateProjectModal from "../../components/modals/CreateProjectModal";
 
 const ProjectsView = () => {
-  const { 
-    projects, 
-    loading, 
-    lists,
-    actions
-  } = useData();
-  
+  const { projects, loading, lists, actions } = useData();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [showActions, setShowActions] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(null);
   const initFormData = {
-    project_name: '',
-    market_id: '',
+    project_name: "",
+    market_id: "",
     init_date: new Date(),
     end_date: null,
-    status: true
-  }
+  };
   const [formData, setFormData] = useState(initFormData);
+
+  const toggleStatus = async (project) => {
+    if (project.status) {
+      await actions.projects.update(project.id, { status: false });
+    } else {
+      const activeProject = projects.find((p) => p.status);
+      if (activeProject) {
+        await actions.projects.update(activeProject.id, { status: false });
+      }
+      await actions.projects.update(project.id, { status: true });
+    }
+  };
+
+  const handleToggleStatus = async (project) => {
+    Alert.alert(
+      `${
+        !project.status
+          ? "Excelente, ahora las señales estarán disponibles!"
+          : "Tus usuarios no podrán ver las señales de este proyecto"
+      }`,
+      `¿Estás seguro de que deseas ${
+        project.status ? "desactivar" : "activar"
+      } el proyecto "${project.project_name}"?`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: project.status ? "Desactivar" : "Activar",
+          onPress: () => toggleStatus(project),
+        },
+      ]
+    );
+  };
 
   const handleAddProject = () => {
     setFormData(initFormData);
@@ -48,7 +74,6 @@ const ProjectsView = () => {
       market_id: project.market_id,
       init_date: new Date(project.init_date),
       end_date: project.end_date ? new Date(project.end_date) : null,
-      status: project.status
     });
     setEditingProject(project);
     setIsModalVisible(true);
@@ -57,49 +82,68 @@ const ProjectsView = () => {
   const handleSaveProject = () => {
     const projectData = {
       ...formData,
-      init_date: formData.init_date.toISOString().split('T')[0],
-      end_date: formData.end_date ? formData.end_date.toISOString().split('T')[0] : null
+      init_date: formData.init_date.toISOString().split("T")[0],
+      end_date: formData.end_date
+        ? formData.end_date.toISOString().split("T")[0]
+        : null,
     };
-    if (editingProject) {
-      actions.projects.update(editingProject.id, projectData)
-        .then(() => {
-          setIsModalVisible(false);
-          setEditingProject(null);
-        })
-        .catch(err => console.error("Error updating project:", err));
-    } else {
-      actions.projects.create(projectData)
-        .then(() => {
-          setIsModalVisible(false);
-        })
-        .catch(err => console.error("Error creating project:", err));
+    try {
+      if (editingProject) {
+        actions.projects.update(editingProject.id, projectData);
+      } else {
+        actions.projects.create({ ...projectData, status: false });
+      }
+    } catch (error) {
+      console.error("Error saving project:", error);
+    } finally {
+      setInitialValues();
     }
+  };
+
+  const setInitialValues = () => {
     setFormData(initFormData);
     setEditingProject(null);
-    setShowActions(null);
     setIsModalVisible(false);
+    setShowActions(null);
   };
 
   const handleDeleteProject = (id) => {
-    console.log("Eliminando proyecto con id:", id);
-    setShowActions(null);
+    Alert.alert(
+      "Eliminar proyecto",
+      "¿Estás seguro de que deseas eliminar este proyecto?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          onPress: () => {
+            actions.projects
+              .delete(id)
+              .catch((err) => console.error("Error deleting project:", err));
+            setShowActions(null);
+          },
+        },
+      ]
+    );
   };
 
   const toggleActions = (id) => {
     setShowActions(showActions === id ? null : id);
   };
 
-  const handleDateChange = (event, selectedDate, field) => {
-    setShowDatePicker(null);
-    if (selectedDate) {
-      setFormData({...formData, [field]: selectedDate});
-    }
-  };
-
   if (loading) return <ActivityIndicator size="large" />;
 
   return (
     <View style={styles.container}>
+      <View style={styles.infoBox}>
+        <MaterialIcons name="info-outline" size={18} color="#6200ee" />
+        <Text style={styles.infoText}>
+          Solo puede haber un proyecto activo a la vez
+        </Text>
+      </View>
+
       <TouchableOpacity style={styles.addButton} onPress={handleAddProject}>
         <MaterialCommunityIcons name="plus" size={24} color="white" />
         <Text style={styles.addButtonText}>Nuevo Proyecto</Text>
@@ -113,32 +157,51 @@ const ProjectsView = () => {
             <View style={styles.itemContent}>
               <Text style={styles.itemTitle}>{item.project_name}</Text>
               <Text style={styles.itemSubtitle}>
-                {lists.markets.find(m => m.id === item.market_id)?.market_name || 'Sin mercado'}
+                {lists.markets.find((m) => m.id === item.market_id)
+                  ?.market_name || "Sin mercado"}
               </Text>
               <Text style={styles.itemDates}>
-                {new Date(item.init_date).toLocaleDateString()} - {item.end_date ? new Date(item.end_date).toLocaleDateString() : 'Presente'}
+                {new Date(item.init_date).toLocaleDateString()} -{" "}
+                {item.end_date
+                  ? new Date(item.end_date).toLocaleDateString()
+                  : "Presente"}
               </Text>
             </View>
-            
-            <Pressable onPress={() => toggleActions(item.id)}>
-              <MaterialIcons name="more-vert" size={24} color="#757575" />
-            </Pressable>
+
+            <View style={styles.itemControls}>
+              <Pressable
+                style={styles.statusButton}
+                onPress={() => handleToggleStatus(item)}
+              >
+                <MaterialCommunityIcons
+                  name={item.status ? "toggle-switch" : "toggle-switch-off"}
+                  size={32}
+                  color={item.status ? "#6200ee" : "#757575"}
+                />
+              </Pressable>
+
+              <Pressable onPress={() => toggleActions(item.id)}>
+                <MaterialIcons name="more-vert" size={24} color="#757575" />
+              </Pressable>
+            </View>
 
             {showActions === item.id && (
               <View style={styles.actionsMenu}>
-                <Pressable 
+                <Pressable
                   style={styles.actionButton}
                   onPress={() => handleEditProject(item)}
                 >
                   <MaterialIcons name="edit" size={18} color="#6200ee" />
                   <Text style={styles.actionText}>Editar</Text>
                 </Pressable>
-                <Pressable 
+                <Pressable
                   style={styles.actionButton}
                   onPress={() => handleDeleteProject(item.id)}
                 >
                   <MaterialIcons name="delete" size={18} color="#ff0000" />
-                  <Text style={[styles.actionText, { color: "#ff0000" }]}>Eliminar</Text>
+                  <Text style={[styles.actionText, { color: "#ff0000" }]}>
+                    Eliminar
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -152,103 +215,14 @@ const ProjectsView = () => {
       />
 
       {/* Modal del formulario */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <ScrollView contentContainerStyle={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
-              </Text>
-
-              <Text style={styles.inputLabel}>Nombre del proyecto</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nombre del proyecto"
-                value={formData.project_name}
-                onChangeText={(text) => setFormData({...formData, project_name: text})}
-              />
-
-              <Text style={styles.inputLabel}>Mercado</Text>
-              <View style={styles.pickerContainer}>
-                {lists.markets.map(market => (
-                  <Pressable
-                    key={market.id}
-                    style={[
-                      styles.marketOption,
-                      formData.market_id === market.id && styles.selectedMarket
-                    ]}
-                    onPress={() => setFormData({...formData, market_id: market.id})}
-                  >
-                    <Text>{market.market_name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              <Text style={styles.inputLabel}>Fecha de inicio</Text>
-              <Pressable 
-                style={styles.dateInput}
-                onPress={() => setShowDatePicker('init_date')}
-              >
-                <Text>{formData.init_date.toLocaleDateString()}</Text>
-              </Pressable>
-
-              <Text style={styles.inputLabel}>Fecha de finalización (opcional)</Text>
-              <Pressable 
-                style={styles.dateInput}
-                onPress={() => setShowDatePicker('end_date')}
-              >
-                <Text>
-                  {formData.end_date ? formData.end_date.toLocaleDateString() : 'Seleccionar fecha'}
-                </Text>
-              </Pressable>
-
-              <View style={styles.statusContainer}>
-                <Text style={styles.inputLabel}>Estado: </Text>
-                <Pressable
-                  style={styles.statusToggle}
-                  onPress={() => setFormData({...formData, status: !formData.status})}
-                >
-                  <Text>{formData.status ? 'Activo' : 'Inactivo'}</Text>
-                  <MaterialCommunityIcons 
-                    name={formData.status ? "toggle-switch" : "toggle-switch-off"} 
-                    size={24} 
-                    color={formData.status ? "#6200ee" : "#757575"} 
-                  />
-                </Pressable>
-              </View>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={formData[showDatePicker] || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={(event, date) => handleDateChange(event, date, showDatePicker)}
-                />
-              )}
-
-              <View style={styles.modalButtons}>
-                <Pressable 
-                  style={styles.cancelButton}
-                  onPress={() => setIsModalVisible(false)}
-                >
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
-                </Pressable>
-                <Pressable 
-                  style={styles.saveButton}
-                  onPress={handleSaveProject}
-                >
-                  <Text style={styles.saveButtonText}>Guardar</Text>
-                </Pressable>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+      <CreateProjectModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        formData={formData}
+        setFormData={setFormData}
+        editingProject={editingProject}
+        handleSaveProject={handleSaveProject}
+      />
     </View>
   );
 };
@@ -258,6 +232,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#fff",
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3e5ff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  infoText: {
+    marginLeft: 8,
+    color: "#6200ee",
+    fontSize: 14,
   },
   addButton: {
     flexDirection: "row",
@@ -272,22 +259,29 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: 8,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginBottom: 8,
     borderRadius: 8,
     elevation: 2,
   },
   itemContent: {
     flex: 1,
+  },
+  itemControls: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statusButton: {
+    marginRight: 12,
   },
   itemTitle: {
     fontSize: 16,
@@ -302,13 +296,13 @@ const styles = StyleSheet.create({
   itemDates: {
     fontSize: 12,
     color: "#757575",
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   actionsMenu: {
-    position: 'absolute',
-    right: 0,
-    top: 40,
-    backgroundColor: 'white',
+    position: "absolute",
+    right: 40,
+    top: 5,
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 8,
     elevation: 3,
@@ -337,104 +331,6 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#757575",
     fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: "90%",
-    maxHeight: "80%",
-    backgroundColor: "white",
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  modalContent: {
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#424242',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  marketOption: {
-    padding: 10,
-    margin: 4,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  selectedMarket: {
-    borderColor: '#6200ee',
-    backgroundColor: '#f3e5ff',
-  },
-  dateInput: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  statusToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 12,
-    alignItems: "center",
-    marginRight: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  cancelButtonText: {
-    color: "#757575",
-    fontWeight: "500",
-  },
-  saveButton: {
-    flex: 1,
-    padding: 12,
-    alignItems: "center",
-    backgroundColor: "#6200ee",
-    borderRadius: 8,
-  },
-  saveButtonText: {
-    color: "white",
-    fontWeight: "500",
   },
 });
 
