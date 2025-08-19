@@ -96,18 +96,18 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
       let url;
       if (status) {
-        url = `/projects?status=${status}`
+        url = `/projects?status=${status}`;
       } else {
-        url = "/projects"
+        url = "/projects";
       }
-      
+
       try {
         const { data } = await axiosInstance.get(url);
         setProjects(data);
         return data;
       } catch (err) {
         console.log("hubo un erro");
-        
+
         return handleError(err);
       } finally {
         setLoading(false);
@@ -217,6 +217,15 @@ export const DataProvider = ({ children }) => {
         setLoading(false);
       }
     },
+    takeSignal: async (signalId) => {
+      try {
+        const response = await axiosInstance.post(`/signals/${signalId}/take`);
+        return response.data;
+      } catch (error) {
+        console.error("Error taking signal:", error);
+        throw error;
+      }
+    },
   };
 
   const instrumentActions = {
@@ -307,16 +316,16 @@ export const DataProvider = ({ children }) => {
   };
 
   const openMT5WithParameters = async () => {
-  try {
-    const mt5Installed = await Linking.canOpenURL("metatrader5://");
+    try {
+      const mt5Installed = await Linking.canOpenURL("metatrader5://");
 
-    if (mt5Installed) {
-      await Linking.openURL("metatrader5://");
+      if (mt5Installed) {
+        await Linking.openURL("metatrader5://");
+      }
+    } catch (error) {
+      return null;
     }
-  } catch (error) {
-    return null;
-  }
-};
+  };
 
   return (
     <DataContext.Provider

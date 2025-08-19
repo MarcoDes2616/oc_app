@@ -29,6 +29,7 @@ const SenalesScreen = () => {
       if (result.length > 0) {
         setSelectedProject(result[0]);
       }
+      await actions.instruments.getAll();
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {

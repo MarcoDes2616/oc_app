@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,14 @@ import {
   Image,
   Modal,
   Clipboard,
+  Animated,
+  Easing
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useData } from "../context/DataContext";
+import AccessToMT5btn from "./AccessToMT5btn";
+import InterestArea from "./InterestArea";
+import { AppContext } from "../context/AppContext";
 
 const SignalItem = ({
   item,
@@ -20,20 +25,33 @@ const SignalItem = ({
   toggleActions,
   hideActions,
 }) => {
+  const {user} = useContext(AppContext);
+  const takersIds = item.takenBy?.map((t) => t.id) || [];
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+  const [expandedImage, setExpandedImage] = useState(false);
+  const [takingSignal, setTakingSignal] = useState(false);
+  const [isSignalTaken, setIsSignalTaken] = useState(takersIds.includes(user?.id));
+  console.log(item);
+  
+  const { openMT5WithParameters, actions } = useData();
 
-  const { openMT5WithParameters } = useData();
+  const status = lists.signalStatus?.find((s) => s.id === item.signal_status_id);
+  const instrument = lists.instruments?.find((i) => i.id === item.instrument_id);
+  const operation = lists.operationsTypes?.find((o) => o.id === item.operation_type_id);
 
-  const status = lists.signalStatus?.find(
-    (s) => s.id === item.signal_status_id
-  );
-  const instrument = lists.instruments?.find(
-    (i) => i.id === item.instrument_id
-  );
-  const operation = lists.operationsTypes?.find(
-    (o) => o.id === item.operation_type_id
-  );
+  const handleTakeSignal = async () => {
+    try {
+      setTakingSignal(true);
+      await actions.signals.takeSignal(item.id);
+      setIsSignalTaken(true);
+      Alert.alert("Éxito", "Has confirmado que tomaste esta señal");
+    } catch (error) {
+      Alert.alert("Error", "No se pudo confirmar la señal");
+    } finally {
+      setTakingSignal(false);
+    }
+  };
 
   const copyToClipboard = (text, fieldName) => {
     if (!text) return;
@@ -58,19 +76,14 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text
-          style={[styles.statusText, { color: status?.color || "#757575" }]}
-        >
+        <Text style={[styles.statusText, { color: status?.color || "#757575" }]}>
           {status?.signal_status_name}
         </Text>
       </View>
 
       {/* Botón MT5 */}
       {hideActions && (
-        <Pressable style={styles.mt5Button} onPress={openMT5WithParameters}>
-          <MaterialIcons name="launch" size={20} color="#43A047" />
-          <Text style={styles.mt5ButtonText}>Configurar en MT5</Text>
-        </Pressable>
+        <AccessToMT5btn openMT5WithParameters={openMT5WithParameters} />
       )}
 
       {/* Valores copiables */}
@@ -122,42 +135,64 @@ const SignalItem = ({
             <Text style={styles.targetText}>
               {item.expected_target || "N/A"}
             </Text>
-            <MaterialIcons
-              name="content-copy"
-              size={16}
-              color="#6200ee"
-              style={styles.copyIcon}
-            />
-            {copiedField === "target" && (
-              <Text style={styles.copiedText}>Copiado!</Text>
-            )}
           </View>
         </Pressable>
       </View>
 
-      {/* Zona de interés */}
-      <View style={styles.interestZone}>
-        <Text style={styles.zoneLabel}>Zona de interés:</Text>
-        <View style={styles.zoneValues}>
-          <Text style={styles.zoneText}>
-            Mín: {item.price_range_min || "N/A"}
+      {/* Botón "He tomado esta señal" */}
+      {hideActions && !isSignalTaken && (
+        <Pressable 
+          style={styles.takeSignalButton}
+          onPress={handleTakeSignal}
+          disabled={takingSignal}
+        >
+          <MaterialIcons 
+            name="check-circle" 
+            size={20} 
+            color="#fff" 
+          />
+          <Text style={styles.takeSignalText}>
+            {takingSignal ? "Confirmando..." : "He tomado esta señal"}
           </Text>
-          <Text style={styles.zoneText}>
-            Máx: {item.price_range_max || "N/A"}
-          </Text>
-        </View>
-      </View>
+        </Pressable>
+      )}
 
-      {/* Imagen */}
+      {isSignalTaken && (
+        <View style={styles.signalTakenBadge}>
+          <MaterialIcons name="check-circle" size={16} color="#4CAF50" />
+          <Text style={styles.signalTakenText}>Señal tomada</Text>
+        </View>
+      )}
+
+      {/* Zona de interés - Acordeón */}
+      <InterestArea item={item} />
+
+      {/* Imagen - Acordeón */}
       {isValidUrl(item.image_reference) && (
         <>
-          <Pressable onPress={() => setFullscreenImage(true)}>
-            <Image
-              source={{ uri: item.image_reference }}
-              style={styles.image}
-              resizeMode="contain"
+          <Pressable 
+            style={styles.accordionHeader}
+            onPress={() => setExpandedImage(!expandedImage)}
+          >
+            <Text style={styles.accordionTitle}>Imagen de referencia</Text>
+            <MaterialIcons
+              name={expandedImage ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+              size={24}
+              color="#757575"
             />
           </Pressable>
+
+          {expandedImage && (
+            <View style={styles.accordionContent}>
+              <Pressable onPress={() => setFullscreenImage(true)}>
+                <Image
+                  source={{ uri: item.image_reference }}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+              </Pressable>
+            </View>
+          )}
 
           <Modal
             visible={fullscreenImage}
@@ -250,6 +285,34 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontWeight: "500",
   },
+  takeSignalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  takeSignalText: {
+    color: "#fff",
+    marginLeft: 8,
+    fontWeight: "500",
+  },
+  signalTakenBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+  },
+  signalTakenText: {
+    color: "#4CAF50",
+    marginLeft: 4,
+    fontWeight: "500",
+  },
   valuesContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -295,16 +358,22 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
   },
-  interestZone: {
-    marginBottom: 12,
-    paddingTop: 8,
+  accordionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: "#eee",
+    marginBottom: 8,
   },
-  zoneLabel: {
+  accordionTitle: {
     fontSize: 14,
-    color: "#757575",
-    marginBottom: 4,
+    fontWeight: "500",
+    color: "#333",
+  },
+  accordionContent: {
+    marginBottom: 12,
   },
   zoneValues: {
     flexDirection: "row",
@@ -319,8 +388,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 180,
     borderRadius: 8,
-    marginTop: 8,
-    marginBottom: 12,
   },
   fullscreenContainer: {
     flex: 1,
@@ -338,13 +405,13 @@ const styles = StyleSheet.create({
     right: 16,
   },
   actionsMenu: {
-    position: "absolute",
-    top: 50,
-    right: 16,
-    backgroundColor: "#fff",
+    position: 'absolute',
+    right: 0,
+    top: 40,
+    backgroundColor: 'white',
     borderRadius: 8,
     padding: 8,
-    elevation: 4,
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -355,12 +422,11 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   actionText: {
     marginLeft: 8,
-    fontSize: 14,
   },
 });
 
