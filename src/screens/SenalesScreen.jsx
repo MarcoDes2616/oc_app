@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View, Text, StyleSheet } from "react-native";
 import { useData } from "../context/DataContext";
 import SignalsListView from "../components/SignalsListView";
+import { IconButton } from "react-native-paper";
 
 const SenalesScreen = () => {
   const { lists, actions, loading, projects, signals } = useData();
@@ -50,25 +51,45 @@ const SenalesScreen = () => {
     }
   };
 
-  if ((loading && !refreshing) || !selectedProject) return <ActivityIndicator size="large" />;
+  if (loading && !refreshing) return <ActivityIndicator size="large" />;
 
   return (
     <>
-    {
-      selectedProject &&
-      <SignalsListView
-        selectedProject={selectedProject}
-        signals={signals}
-        lists={lists}
-        refreshing={refreshing}
-        onRefresh={fetchSignals}
-        hideActions={true}
-        setFilterStatus={setFilterStatus}
-        filterStatus={filterStatus}
+      {selectedProject ? (
+        <SignalsListView
+          selectedProject={selectedProject}
+          signals={signals}
+          lists={lists}
+          refreshing={refreshing}
+          onRefresh={fetchSignals}
+          hideActions={true}
+          setFilterStatus={setFilterStatus}
+          filterStatus={filterStatus}
         />
-    }
+      ) : (
+        <View>
+          <IconButton
+            icon="refresh"
+            size={24}
+            style={styles.resetIcon}
+            onPress={initialFetch}
+            disabled={loading}
+            accessibilityLabel="Reiniciar proceso de login"
+          />
+          <Text>Aun no tenemos señales para mostrar!</Text>
+        </View>
+      )}
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  resetIcon: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+});
 
 export default SenalesScreen;
