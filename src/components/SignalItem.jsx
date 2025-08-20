@@ -8,7 +8,7 @@ import {
   Modal,
   Clipboard,
   Animated,
-  Easing
+  Easing,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useData } from "../context/DataContext";
@@ -25,20 +25,26 @@ const SignalItem = ({
   toggleActions,
   hideActions,
 }) => {
-  const {user} = useContext(AppContext);
+  const { user } = useContext(AppContext);
   const takersIds = item.takenBy?.map((t) => t.id) || [];
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   const [expandedImage, setExpandedImage] = useState(false);
   const [takingSignal, setTakingSignal] = useState(false);
-  const [isSignalTaken, setIsSignalTaken] = useState(takersIds.includes(user?.id));
-  console.log(item);
-  
+  const [isSignalTaken, setIsSignalTaken] = useState(
+    takersIds.includes(user?.id)
+  );
   const { openMT5WithParameters, actions } = useData();
 
-  const status = lists.signalStatus?.find((s) => s.id === item.signal_status_id);
-  const instrument = lists.instruments?.find((i) => i.id === item.instrument_id);
-  const operation = lists.operationsTypes?.find((o) => o.id === item.operation_type_id);
+  const status = lists.signalStatus?.find(
+    (s) => s.id === item.signal_status_id
+  );
+  const instrument = lists.instruments?.find(
+    (i) => i.id === item.instrument_id
+  );
+  const operation = lists.operationsTypes?.find(
+    (o) => o.id === item.operation_type_id
+  );
 
   const handleTakeSignal = async () => {
     try {
@@ -76,7 +82,9 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text style={[styles.statusText, { color: status?.color || "#757575" }]}>
+        <Text
+          style={[styles.statusText, { color: status?.color || "#757575" }]}
+        >
           {status?.signal_status_name}
         </Text>
       </View>
@@ -141,18 +149,14 @@ const SignalItem = ({
 
       {/* Botón "He tomado esta señal" */}
       {hideActions && !isSignalTaken && (
-        <Pressable 
+        <Pressable
           style={styles.takeSignalButton}
           onPress={handleTakeSignal}
           disabled={takingSignal}
         >
-          <MaterialIcons 
-            name="check-circle" 
-            size={20} 
-            color="#fff" 
-          />
+          <MaterialIcons name="check-circle" size={20} color="#fff" />
           <Text style={styles.takeSignalText}>
-            {takingSignal ? "Confirmando..." : "He tomado esta señal"}
+            {takingSignal ? "Confirmando..." : "Tomar esta señal"}
           </Text>
         </Pressable>
       )}
@@ -165,12 +169,12 @@ const SignalItem = ({
       )}
 
       {/* Zona de interés - Acordeón */}
-      <InterestArea item={item} />
+      {hideActions && <InterestArea item={item} />}
 
       {/* Imagen - Acordeón */}
       {isValidUrl(item.image_reference) && (
         <>
-          <Pressable 
+          <Pressable
             style={styles.accordionHeader}
             onPress={() => setExpandedImage(!expandedImage)}
           >
@@ -214,13 +218,18 @@ const SignalItem = ({
       )}
 
       {/* Menú de acciones */}
-      {!hideActions && (
+      {!hideActions ? (
         <Pressable
           style={styles.moreButton}
           onPress={() => toggleActions(item.id)}
         >
           <MaterialIcons name="more-vert" size={24} color="#757575" />
         </Pressable>
+      ) : (
+        <View style={styles.userCountContainer}>
+          <MaterialIcons name="people" size={20} color="#757575" />
+          <Text style={styles.userCountText}>{item.takenBy?.length || 0}</Text>
+        </View>
       )}
 
       {showActions === item.id && (
@@ -256,6 +265,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
+   userCountContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  userCountText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#757575',
+    marginLeft: 4,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -268,21 +294,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
-    marginRight: 25,
-    fontWeight: "500",
-  },
-  mt5Button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E8F5E9",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  mt5ButtonText: {
-    color: "#43A047",
-    marginLeft: 8,
+    marginRight: 55,
     fontWeight: "500",
   },
   takeSignalButton: {
@@ -302,11 +314,11 @@ const styles = StyleSheet.create({
   signalTakenBadge: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#E8F5E9",
     padding: 8,
     borderRadius: 8,
     marginBottom: 12,
-    alignSelf: 'flex-start',
   },
   signalTakenText: {
     color: "#4CAF50",
@@ -405,10 +417,10 @@ const styles = StyleSheet.create({
     right: 16,
   },
   actionsMenu: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 40,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 8,
     elevation: 3,
