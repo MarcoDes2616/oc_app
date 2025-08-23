@@ -6,7 +6,7 @@ const AccessToMT5btn = ({openMT5WithParameters}) => {
   return (
     <Pressable
       style={styles.mt5Button}
-      onPress={() => openMT5WithParameters(item)}
+      onPress={() => openMT5WithParameters()}
     >
       <MaterialIcons name="launch" size={20} color="#43A047" />
       <Text style={styles.mt5ButtonText}>Configurar en MT5</Text>
