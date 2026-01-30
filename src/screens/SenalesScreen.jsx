@@ -84,6 +84,9 @@ const SenalesScreen = () => {
   );
 };
 
+
+export default SenalesScreen;
+
 const styles = StyleSheet.create({
   resetIcon: {
     position: "absolute",
@@ -92,5 +95,3 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 });
-
-export default SenalesScreen;
