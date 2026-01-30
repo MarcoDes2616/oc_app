@@ -10,27 +10,38 @@ import AdminScreen from "../screens/AdminScreen";
 import { DataProvider } from "../context/DataContext";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
+import { Text, StyleSheet } from "react-native";
+import LoginScreen from "../screens/LoginScreen";
 
 const Tab = createBottomTabNavigator();
 
 const ProfileStack = createNativeStackNavigator();
 
-const ProfileStackScreen = () => (
-  <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-    <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
-    <ProfileStack.Screen name="Settings" component={SettingsScreen} />
-  </ProfileStack.Navigator>
-);
 
 const MainNavigator = () => {
   const {user} = useContext(AppContext)
-
+  
+  const ProfileStackScreen = () => (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      {
+        user ? (
+          <>
+          <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
+          <ProfileStack.Screen name="Settings" component={SettingsScreen} />
+          </>
+        ): (
+          <ProfileStack.Screen name="ProfileMain" component={LoginScreen} />
+        )
+      }
+    </ProfileStack.Navigator>
+  );
+  
   const tabScreens = [
     {
       name: "Señales",
       component: SenalesScreen,
       icon: "chart-line",
-      roles: [1, 2]
+      roles: [1, 2, undefined]
     },
     {
       name: "Dashboard",
@@ -48,7 +59,7 @@ const MainNavigator = () => {
       name: "Perfil",
       component: ProfileStackScreen,
       icon: "account",
-      roles: [1, 2]
+      roles: [1, 2, undefined]
     },
     {
       name: "Admin",
@@ -66,7 +77,15 @@ const MainNavigator = () => {
         screenOptions={{
           headerShown: true,
           tabBarActiveTintColor: "#6200ee",
-          tabBarStyle: { paddingBottom: 5, height: 95 },
+          tabBarStyle: {
+            backgroundColor: "#ffffff",
+            borderTopWidth: 1,
+            borderTopColor: "#e5e5ea",
+            height: 60,
+            paddingBottom: 5,
+            paddingTop: 5,
+          },
+          headerShown: false,
         }}
       >
         {tabScreens.map((screen) => {
@@ -91,8 +110,24 @@ const MainNavigator = () => {
         )}
       )}
       </Tab.Navigator>
+      {/* <Text style={styles.maintenanceText}>MainNavigator is under maintenance.</Text> */}
     </DataProvider>
   );
 };
 
 export default MainNavigator;
+
+
+const styles = StyleSheet.create({
+  maintenanceText: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 18,
+    color: 'red',
+    borderWidth: 2,
+    borderColor: 'red',
+    padding: 10,
+    textAlign: 'center',
+  },
+});
