@@ -15,6 +15,8 @@ import { useData } from "../context/DataContext";
 import AccessToMT5btn from "./AccessToMT5btn";
 import InterestArea from "./InterestArea";
 import { AppContext } from "../context/AppContext";
+import { State } from "react-native-gesture-handler";
+import StatusIndicator from "./StatusIndicator";
 
 const SignalItem = ({
   item,
@@ -82,11 +84,7 @@ const SignalItem = ({
         <Text style={styles.instrumentText}>
           {instrument?.instrument_name} - {operation?.operation_type_name}
         </Text>
-        <Text
-          style={[styles.statusText, { color: status?.color || "#757575" }]}
-        >
-          {status?.signal_status_name}
-        </Text>
+        <StatusIndicator statusId={item.signal_status_id} showLabel={true} />
       </View>
 
       {/* Botón MT5 */}

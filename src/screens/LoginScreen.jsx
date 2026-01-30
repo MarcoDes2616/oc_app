@@ -9,9 +9,9 @@ import {
 import { TextInput, Button, Text, IconButton } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppContext } from "../context/AppContext";
-import axiosInstance from "../services/axios.js";
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
+import axiosInstance from "../services/axios";
 
 const STORAGE_KEY = "user_email";
 
@@ -98,15 +98,17 @@ const LoginScreen = () => {
       const response = await axiosInstance.post("/system/request_auth_token", {
         email: email.trim(),
       });
+      console.log(response);
+      
 
-      if (response.status === 403 && response.data.code === "SESSION_ACTIVE") {
-        // Hay una sesión activa, mostramos la información
-        setActiveSessionInfo({
-          lastLogin: response.data.session.last_login,
-          message: response.data.message,
-        });
-        return;
-      }
+      // if (response.status === 403 && response.data.code === "SESSION_ACTIVE") {
+      //   // Hay una sesión activa, mostramos la información
+      //   setActiveSessionInfo({
+      //     lastLogin: response.data.session.last_login,
+      //     message: response.data.message,
+      //   });
+      //   return;
+      // }
 
       if (response.data.success) {
         await AsyncStorage.setItem(STORAGE_KEY, email.trim());

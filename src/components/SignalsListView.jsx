@@ -75,6 +75,7 @@ const SignalsListView = ({
       {/* Lista de señales */}
       <FlatList
         data={signals}
+        style={{ height: "100%" }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
   },
   projectHeader: {
     flexDirection: "row",

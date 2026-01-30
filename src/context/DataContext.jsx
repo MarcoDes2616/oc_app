@@ -106,7 +106,7 @@ export const DataProvider = ({ children }) => {
         setProjects(data);
         return data;
       } catch (err) {
-        console.log("hubo un erro");
+        console.log("hubo un error");
 
         return handleError(err);
       } finally {

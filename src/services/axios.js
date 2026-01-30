@@ -3,7 +3,7 @@ import { EXPO_PUBLIC_API_LOCAL, EXPO_PUBLIC_API_PROD } from '@env';
 import authService from './authServices';
 
 const axiosInstance = axios.create({
-  baseURL: EXPO_PUBLIC_API_PROD,
+  baseURL: "http://192.168.1.112:8080/api/v1",
   headers: {
     'Content-Type': 'application/json'
   },
@@ -15,6 +15,8 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log(config);
+    
     return config;
   }
 );

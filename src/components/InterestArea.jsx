@@ -93,7 +93,7 @@ const InterestArea = ({ item }) => {
                   Riesgo: {stopLoss > 0 ? Math.abs(entryPoint - stopLoss).toFixed(2) : 'N/A'} pips
                 </Text>
                 <Text style={[styles.rewardText, { color: textColor }]}>
-                  Tp: {takeProfit > 0 ? Math.abs(takeProfit - entryPoint).toFixed(2) : 'N/A'}
+                  Tp: {takeProfit > 0 ? Math.abs(isBuy ? takeProfit + entryPoint : entryPoint - takeProfit).toFixed(2) : 'N/A'}
                 </Text>
               </View>
             </View>
