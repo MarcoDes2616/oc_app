@@ -3,7 +3,7 @@ import { EXPO_PUBLIC_API_LOCAL, EXPO_PUBLIC_API_PROD } from '@env';
 import authService from './authServices';
 
 const axiosInstance = axios.create({
-  baseURL: "http://192.168.1.112:8080/api/v1",
+  baseURL: EXPO_PUBLIC_API_PROD,
   headers: {
     'Content-Type': 'application/json'
   },
