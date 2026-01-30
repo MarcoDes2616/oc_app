@@ -14,7 +14,8 @@ const AppContent = () => {
 
   return (
     <NavigationContainer>
-      {user ? <MainNavigator /> : <LoginScreen />}
+      <MainNavigator />
+      {/* {user ? <MainNavigator /> : <LoginScreen />} */}
     </NavigationContainer>
   );
 };
