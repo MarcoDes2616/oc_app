@@ -13,7 +13,7 @@ const SenalesScreen = () => {
   const [filterStatus, setFilterStatus] = useState(null);
 
   useEffect(() => {
-    // initialFetch();
+    initialFetch();
   }, []);
 
   useEffect(() => {
