@@ -98,9 +98,6 @@ const LoginScreen = () => {
       const response = await axiosInstance.post("/system/request_auth_token", {
         email: email.trim(),
       });
-      console.log(response);
-      
-
       // if (response.status === 403 && response.data.code === "SESSION_ACTIVE") {
       //   // Hay una sesión activa, mostramos la información
       //   setActiveSessionInfo({

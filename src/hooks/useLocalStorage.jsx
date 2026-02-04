@@ -85,7 +85,6 @@ const useLocalStorage = () => {
           const value = await getKey(key);
           allData[key] = value || null;
         }
-        console.log(allData);
 
         return allData;
       }
@@ -106,9 +105,7 @@ const useLocalStorage = () => {
             if (existingValue === null) {
               // Solo guardar si no existe
               localStorage.setItem(key, JSON.stringify(value));
-              console.log(`✅ Clave "${key}" creada`);
             } else {
-              console.log(`⏭️  Clave "${key}" ya existe, omitiendo`);
             }
           }
         } else {
@@ -119,9 +116,7 @@ const useLocalStorage = () => {
               if (existingValue === null) {
                 // Solo guardar si no existe
                 await AsyncStorage.setItem(key, JSON.stringify(value));
-                // console.log(`✅ Clave "${key}" creada`);
               } else {
-                // console.log(`⏭️  Clave "${key}" ya existe, omitiendo`);
               }
             } catch (itemError) {
               console.error(`❌ Error con clave "${key}":`, itemError);
@@ -129,7 +124,6 @@ const useLocalStorage = () => {
           }
         }
 
-        console.log("✅ Storage inicial creado/actualizado correctamente");
         return true;
       } catch (error) {
         console.error("❌ Error creando storage inicial:", error);
