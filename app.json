@@ -42,10 +42,7 @@
       ],
       "permissions": [
         "android.permission.QUERY_ALL_PACKAGES"
-      ],
-      "notification": {
-        "icon": "./assets/notification_icon.png"
-      }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
